@@ -1,0 +1,156 @@
+/* Single QR Mode Styles - Dark Theme - Simplified */
+.single-qr-mode .vault-progress-simple {
+    margin-top: 20px;
+}
+
+.single-qr-mode .vault-name {
+    color: #e5e5e5;
+    font-size: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #333333;
+}
+
+/* Simplified Progress Item Row */
+.single-qr-mode .progress-item-row {
+    margin-bottom: 24px;
+}
+
+.single-qr-mode .progress-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #333333;
+    background: #1a1a1a;
+    color: #b3b3b3;
+    transition: all 0.2s ease-in-out;
+    width: fit-content;
+}
+
+.single-qr-mode .progress-item.completed {
+    background: rgba(76, 175, 80, 0.15);
+    border-color: #4caf50;
+    color: #4caf50;
+    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.2);
+}
+
+.single-qr-mode .check-icon {
+    color: #4caf50;
+}
+
+.single-qr-mode .pending-icon {
+    color: #1786ff;
+}
+
+/* Simplified Keys Section */
+.single-qr-mode .keys-section {
+    /* No extra containers */
+}
+
+.single-qr-mode .keys-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: #e5e5e5;
+    font-weight: 600;
+}
+
+.single-qr-mode .section-icon {
+    color: #1786ff;
+}
+
+/* Simplified Keys Grid */
+.single-qr-mode .keys-grid-simple {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.single-qr-mode .key-item-simple {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #333333;
+    background: #1a1a1a;
+    color: #b3b3b3;
+    transition: all 0.2s ease-in-out;
+    cursor: default;
+}
+
+.single-qr-mode .key-item-simple:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(23, 134, 255, 0.15);
+    border-color: #1786ff;
+}
+
+.single-qr-mode .key-item-simple.completed {
+    background: rgba(76, 175, 80, 0.15);
+    border-color: #4caf50;
+    color: #4caf50;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.single-qr-mode .key-alias {
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.single-qr-mode .key-icon {
+    color: #1786ff;
+    font-size: 14px;
+}
+
+.single-qr-mode .key-item-simple.completed .key-icon {
+    color: #4caf50;
+}
+
+.single-qr-mode .keys-note-simple {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    font-size: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #333333;
+}
+
+/* Current Action Styling - Match Dark Theme */
+.single-qr-mode .current-action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    border: 1px solid #333333;
+    border-radius: 12px;
+    color: #e5e5e5;
+    font-size: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.single-qr-mode .current-action .loading {
+    width: 20px;
+    height: 20px;
+}
+
+/* Remove all old nested styles */
+.single-qr-mode .scan-status-section,
+.single-qr-mode .status-card,
+.single-qr-mode .vault-info-section,
+.single-qr-mode .vault-basic-info,
+.single-qr-mode .progress-section,
+.single-qr-mode .section-header,
+.single-qr-mode .progress-items,
+.single-qr-mode .progress-row,
+.single-qr-mode .progress-item-single,
+.single-qr-mode .keys-grid,
+.single-qr-mode .key-item,
+.single-qr-mode .keys-note {
+    display: none;
+} 

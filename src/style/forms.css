@@ -1,0 +1,76 @@
+
+/* ------- FORM stuff ------- */
+.formGroup {
+    padding:10px 0px;
+}
+.formLabel {
+    font-weight: bold;
+    font-size: 1.2rem;
+    font-family: "Graphik", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+
+}
+.formControl {
+    height:44px;
+    font-family: "Graphik", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    font-size:1.4rem;
+    border: 1px solid #999 !important;
+    -webkit-border-radius: 8px !important;
+    -moz-border-radius: 8px !important;
+    border-radius: 8px !important;
+}
+.formGroup input, .formGroup textarea {
+    min-height:50px;
+    font-family: "Graphik", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    font-size:1.4rem;
+}
+
+.formGroupCheckbox input {
+    height: 22px;
+    width: 22px;
+    margin-right: 10px;
+}
+
+.formControl::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #999 !important;
+    opacity: 1; /* Firefox */
+    font-family: "Graphik", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+
+}
+
+.formControl:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: red !important;
+    font-family: "Graphik", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+
+}
+
+.formControl::-ms-input-placeholder { /* Microsoft Edge */
+    color: red !important;
+    font-family: "Graphik", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+}
+
+.formSelect {
+    font-family: "Graphik", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    font-size:20px;
+    border: 1px solid #999 !important;
+    -webkit-border-radius: 8px !important;
+    -moz-border-radius: 8px !important;
+    border-radius: 8px !important;
+    padding-left: 10px;
+    width:100%;
+    height:50px;
+}
+
+.inputGroupIcon {
+    background-color: #fff;
+    border-color:#fff;
+    font-size:24px;
+    line-height: 24px;
+}
+
+.secretTextInput {
+    border: 2px dashed orange !important;
+}
+/** ------ end form stuff ---------- **/
+
+
+

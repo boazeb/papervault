@@ -1,0 +1,106 @@
+/* --- MODERN FOOTER --- */
+.footerContainer {
+  background: #111111;
+  padding: 1.5rem 1rem;
+  border-top: 1px solid #333333;
+  width: 100%;
+}
+
+.footerContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footerLink {
+  color: #1786ff;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+.footerLink:hover {
+  color: #42a5f5;
+}
+
+.footerCopyright {
+  color: #888;
+  font-size: 0.98rem;
+  font-family: "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  white-space: nowrap;
+}
+
+.footerlist {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 2.2rem;
+  align-items: center;
+}
+
+.footerlist li {
+  display: inline-block;
+  font-family: "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-size: 1.08rem;
+  color: #b0b0b0;
+  font-weight: 500;
+}
+.footerlist li a {
+  color: #1786ff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+.footerlist li a:hover {
+  color: #42a5f5;
+  background: rgba(23, 134, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.footerSocial {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  align-items: center;
+}
+.footerSocial a {
+  color: #1786ff;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  padding: 0.8rem;
+  border-radius: 50%;
+  background: rgba(23, 134, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+}
+.footerSocial a:hover {
+  color: #42a5f5;
+  background: rgba(23, 134, 255, 0.2);
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 4px 16px rgba(23, 134, 255, 0.3);
+}
+
+@media (max-width: 600px) {
+  .footerContent {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .footerlist {
+    gap: 1rem;
+    font-size: 0.98rem;
+  }
+  .footerlist li a {
+    padding: 0.5rem 0.8rem;
+  }
+  .footerCopyright {
+    font-size: 0.9rem;
+  }
+}

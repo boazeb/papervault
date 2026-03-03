@@ -1,0 +1,31 @@
+/* Layout styles for integrated navbar */
+
+.layoutWrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-top: 80px;
+}
+
+/* Main content grows to push footer to bottom (flexbox, no fixed/absolute) */
+.layoutMain {
+    flex: 1;
+}
+
+/* Add padding to all pages to account for floating navbar */
+
+/* Homepage doesn't need extra padding since hero section handles it */
+.layoutWrapper:has(.home-page-navbar) {
+    padding-top: 0;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .layoutWrapper {
+        padding-top: 70px;
+    }
+    
+    .layoutWrapper:has(.home-page-navbar) {
+        padding-top: 0;
+    }
+}

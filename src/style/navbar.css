@@ -1,0 +1,282 @@
+/* --- UNIFIED NAVBAR FOR ALL PAGES --- */
+.navbarWrapper {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    box-shadow: none;
+    border-bottom: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 1rem 0;
+}
+
+/* Homepage gets transparent background */
+.home-page-navbar .navbarWrapper {
+    background: transparent !important;
+}
+
+.navbarCustom.modern-navbar {
+    margin-bottom: 0;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0.5rem 0;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.navbarCustom.modern-navbar .navbar-nav {
+    padding: 0;
+}
+
+.navbarCustom.modern-navbar .navbar-brand {
+    padding: 0;
+    margin: 0;
+    margin-right: auto;
+}
+
+.navbarLogo {
+    font-size: 1.15rem !important;
+    font-family: "Graphik-Bold", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.2 !important;
+    color: #ffffff;
+    text-align: left;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.navbarLogo:hover {
+    color: #66bb6a;
+}
+
+.navbarLogo img {
+    margin-right: 0;
+    max-width: 28px;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.modern-nav {
+    width: 100%;
+    gap: 2rem;
+    justify-content: flex-end;
+}
+
+.nav-item {
+    padding: 0 0px;
+}
+
+.navbarCustom .nav-brand {
+    font-family: "Graphik-Bold", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    color: #ffffff;
+    font-size: inherit;
+}
+
+.nav-item .nav-link {
+    color: #ffffff !important;
+    font-family: "Graphik", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.4rem 0.5rem;
+    background: none;
+    border: none;
+    transition: color 0.2s ease;
+    box-shadow: none;
+    outline: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.nav-item .nav-link:hover {
+    color: #66bb6a !important;
+    text-decoration: none;
+}
+
+.nav-item .nav-link.active {
+    color: #66bb6a !important;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.nav-item .nav-link.nav-link-cta {
+    color: #ffffff !important;
+    font-weight: 600;
+    padding: 0.4rem 0.5rem;
+    background: none;
+    border: none;
+    box-shadow: none;
+    transition: color 0.2s ease;
+}
+
+.nav-item .nav-link.nav-link-cta:hover {
+    color: #66bb6a !important;
+    text-decoration: none;
+}
+
+.navbarWrapper .navbar-toggler {
+    border: 1px solid #333333;
+    background: rgba(23, 134, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+}
+
+.navbarWrapper .navbar-toggler:hover {
+    background: rgba(23, 134, 255, 0.2);
+    border-color: #1786ff;
+}
+
+.navbarWrapper .navbar-toggler svg {
+    color: #ffffff;
+    font-size: 30px;
+}
+
+.navbarLogoIcon {
+    color: #ffffff;
+    margin-right: 10px;
+    margin-bottom: 20px;
+    font-size: 39px;
+    line-height: 20px;
+    min-width: 100px;
+}
+
+.navbarCustom {
+    margin-bottom: 0;
+}
+
+.nav-dropdown-item {
+    padding: 4px 20px !important;
+    font-family: "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif !important;
+    background: #1a1a1a;
+    color: #e5e5e5;
+    border-bottom: 1px solid #333333;
+}
+
+.nav-dropdown-item:hover {
+    background: rgba(23, 134, 255, 0.1);
+    color: #66bb6a;
+}
+
+.whitepaperbtn {
+    background-color: #ff9800;
+}
+
+.whitepaperbtn:hover {
+    background-color: #f57c00;
+}
+
+/* Navbar collapse for mobile */
+.navbar-collapse {
+    background: #0a0a0a;
+    border-top: 1px solid #333333;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-radius: 0 0 12px 12px;
+}
+
+/* large devices */
+@media (min-width: 768px) {
+    .navbar-collapse {
+        background: transparent;
+        border: none;
+        margin-top: 0;
+        padding-top: 0;
+    }
+}
+
+/* Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) and (max-width: 767.98px) {
+
+}
+
+/* Extra small devices (portrait phones, less than 576px) */
+@media (max-width: 575.98px) {
+    .nav-item {
+        border-bottom: 1px solid #333333;
+    }
+    .nav-item:last-child {
+        border-bottom: none;
+    }
+    .nav-item .nav-link {
+        font-size: 1rem;
+        padding: 0.5rem 0.5rem;
+        color: #ffffff !important;
+        margin: 0.2rem 0;
+    }
+    .nav-item .nav-link:hover {
+        color: #66bb6a !important;
+    }
+    .nav-item .nav-link.active {
+        color: #66bb6a !important;
+    }
+    .modern-nav {
+        gap: 0.5rem;
+        padding: 1rem 0;
+    }
+}
+
+@media (max-width: 700px) {
+    .nav-link-cta {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Navbar container padding for all screen sizes */
+.navbar-container {
+    padding: 0 1.5rem;
+}
+
+/* Mobile responsive padding */
+@media (max-width: 768px) {
+    .navbar-container {
+        padding: 0 1rem;
+    }
+    
+    .navbarWrapper {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        background: rgba(10, 10, 10, 0.95) !important;
+        backdrop-filter: blur(10px);
+    }
+    
+    /* Homepage navbar stays transparent on mobile too */
+    .home-page-navbar .navbarWrapper {
+        background: rgba(10, 10, 10, 0.8) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-container {
+        padding: 0 0.75rem;
+    }
+}
+
+/* Override ALL Bootstrap navbar internal padding */
+.navbarWrapper .navbar {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.navbarWrapper .navbar > .container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Ensure logo and burger are properly spaced */
+.navbarWrapper .navbar-brand {
+    margin-right: auto !important;
+    padding: 0 !important;
+}

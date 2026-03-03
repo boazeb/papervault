@@ -1,0 +1,523 @@
+
+.dashboardWrapper {
+    /*background-color: #f7f7f7;*/
+    background-color: #1786ff;
+    display: flex;
+    flex:1;
+    flex-direction: column;
+    padding-top:30px;
+    align-items: stretch;
+}
+
+.vaultWrapper {
+
+}
+
+
+.vaultRow {
+    border-bottom:1px solid #ccc;
+    padding:40px 20px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    background-color: #fff;
+    display: block;
+    text-decoration: none;
+}
+.vaultRow:hover {
+    background-color: #f7f7f7;
+    border-bottom:1px dashed #111;
+}
+
+
+.vaultSubrow {
+    align-items: center;
+}
+
+/* avatar stuff */
+.keyholdersSectionWrapper {
+    padding:0px 0px;
+    border:1px solid #ccc;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    margin-top:10px;
+}
+.keyholderWrapper {
+    padding:10px 6px;
+}
+.avatarWrapper {
+    padding:4px 0px !important;
+    position: relative;
+    display: inline-block;
+    margin-right: 8px;
+    -webkit-border-radius: 14px;
+    -moz-border-radius: 14px;
+    border-radius: 14px;
+
+}
+
+/* ------ end avatar stuff ------ */
+
+.vaultName {
+    font-size: 1.7rem;
+    text-decoration: none;
+    line-height: 2rem;
+    display: block;
+}
+.vaultDescription {
+    font-size: 1.2rem;
+    text-decoration: none;
+    color:#2e2e2e;
+    line-height: 1.6rem;
+    margin: 10px 0px;
+}
+.longHash {
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    word-break: break-all;
+/*    background-color: #f7f7f7;*/
+}
+.thresholdWrapper {
+    display: block;
+}
+.threshold {
+    padding: 6px 18px;
+    background-color: #f7f7f7;
+    border: 1px solid #ccc;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.tableTitle {
+    font-size: 1rem !important;
+    font-family: "Graphik-Bold", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.4rem !important;
+    font-weight: bold;
+    display: flex;
+    flex:1;
+    flex-direction: column;
+    justify-content: center;
+    align-items:start;
+    height: 100%;
+    color:#3e3e3e;
+}
+.rowTableContent {
+    display: flex;
+    flex:1;
+    background:greenyellow;
+    flex-direction: row;
+}
+.keyholdersWrapper {
+    background-color: #f7f7f7;
+    padding:30px;
+    border-left:1px solid #ccc;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+/* ---------- vault page */
+
+.vaultPageWrapper {
+    background-color:#fff;
+    display: flex;
+    flex:1;
+    flex-direction: column;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    padding:0px 0px;
+
+}
+.vaultPageVaultName {
+    color:#333;
+    text-shadow: none;
+    margin:0px;
+    padding:0px;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+
+}
+
+.keyStatusAlert {
+    display: inline-block;
+    padding:4px;
+    margin-left:10px;
+    font-size: 12px;
+}
+.keyStatusAlertWrapper {
+    display: inline;
+}
+.unlockButtonWrapper {
+    flex:1;
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    justify-content: center;
+    height:100%;
+}
+.vaultPageHeader {
+    padding:20px 20px 0px 20px;
+    border-bottom: 1px solid #ccc;
+    background: #f7f7f7;
+}
+.vaultPageBody {
+    padding:20px 30px;
+}
+.vaultPageInnerWrapper {
+
+}
+.vaultBodyRow{
+    padding: 20px 0px 20px 0px;
+    flex:1;
+    align-items: center;
+    border-bottom:1px solid #eee;
+
+}
+
+.linknounderline {
+    text-decoration: none;
+}
+
+.vaultOwnerLabel {
+    padding:6px;
+    background-color:#f7f7f7;
+    border: 1px solid #ccc;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    margin-left: 10px;
+    font-size:14px;
+    color:#999;
+}
+.vaultCreatedTimestamp {
+    color:#999;
+}
+
+.dashboardButtonWrapper {
+    padding:0px 0px 0px 10px;
+    display: inline-block;
+}
+.pageWrapper .vaultPageHeader .vaultTab {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    color:#1786ff;
+    text-decoration: none;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    border-bottom:0px;
+    margin-right:4px;
+
+}
+.pageWrapper .vaultPageHeader .activeTab {
+    background-color: #1786ff;
+    color:#fff;
+}
+
+
+.settingsDangerZone {
+    border:1px solid #f5c2c7;
+    padding:20px;
+    margin-top:20px;
+}
+
+.settingsLeftColumn {
+    align-items: start;
+    justify-content: center;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.settingsRightColumn {
+
+    justify-content: center;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height:100%;
+
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: right;
+}
+
+
+.PDFDocument {
+    padding:10px;
+    background: #fff;
+    font-size:1.2rem;
+    min-width:980px;
+    min-height: 1400px;
+}
+.PDFQRWrapper {
+    padding:40px 0px 40px 0px;
+    margin-top:20px;
+    border: 1px solid #ccc;
+    margin-bottom:20px;
+    text-align: center;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+.PDFDocument .PDFQRWrapper h3 {
+    padding-bottom:40px !important;
+}
+.PDFDocument .pageTitle {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.PDFDocument .vaultBodyRow {
+    padding:6px 0px;
+}
+
+.PDFDocument .keyholderWrapper {
+    padding:0px !important;
+    font-size:1rem;
+    line-height: 1.2rem;
+    display: inline-block;
+    margin:0px 10px 0px 0px;
+    background-color: #fff;
+    border:1px solid #ccc;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+}
+
+.PDFDocument .keyholdersSectionWrapper {
+    border:0px;
+}
+.PDFDocument .PDFInstructions {
+    font-size: 1rem;
+    text-align: right;
+    margin-top:30px;
+}
+.PDFDocument .pageNavWrapper {
+    display: block;
+}
+.progressIcon {
+    font-size:1.2rem;
+    line-height: 1.2rem;
+}
+.progress-bar {
+    font-size: 1rem;
+    font-weight: normal;
+    font-family: "Graphik", "Open Sans", "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    color:#999 !important;
+    line-height: 1.6rem;
+}
+.progressBarWrapper .progressBarDefault{
+    background-color: #fff;
+    position: relative;
+}
+.progressBarWrapper .progressBarSuccess {
+    background-color: #d1e7dd;
+    color:#0f5132 !important;
+    position: relative;
+
+}
+.progressBarWrapper .progressBarActive {
+    position: relative;
+    font-weight: bold;
+    background-color: #cfe2ff;
+    color:#0f5132 !important;
+}
+.progressBarWrapper  {
+    display:block;
+    color:#000;
+    border:1px solid #ccc;
+    border-bottom:0px;
+}
+.progressBarWrapper .progress {
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+    -webkit-border-bottom-right-radius: 0px;
+    -webkit-border-bottom-left-radius: 0px;
+    -moz-border-radius-bottomleft: 0px;
+    -moz-border-radius-bottomright: 0px;
+}
+
+
+.centerLoading {
+    text-align:center;
+    flex:1;
+    display: flex;
+    width:100%;
+    flex-direction: column;
+    align-items: center;
+   margin-bottom:30px;
+}
+.loadingStepWrapper {
+    display: flex;
+    flex:1;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+
+.downloadSection {
+    padding:15px;
+    border: 1px solid #333;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+
+}
+
+.unlockrow {
+    display: block;
+    flex-direction: row;
+}
+.unlockrowItem {
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    padding:6px 10px;
+    margin-bottom:10px;
+    background-color: #f7f7f7;
+    font-size: 12px;
+    text-align: center;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    display:inline-block;
+}
+.unlockrowItemSuccess {
+    background-color: #d1e7dd;
+}
+.qrIcon {
+    font-size: 30px;
+}
+.keyIcon {
+    font-size:18px;
+    margin-right: 4px;
+}
+.activeQR {
+    animation: flashing 2s ease-in-out infinite;
+    border: 1px solid steelblue;
+}
+
+.unlockInstruction {
+    margin: 10px 0px 10px 0px;
+    font-size:1rem;
+}
+.unlockIcon {
+    font-size:1.5rem;
+    margin-right:10px;
+}
+.space-between-row {
+    display: flex;
+    flex-direction: row;
+    flex:1;
+    justify-content: space-between;
+}
+.noWrap {
+    white-space: nowrap;
+}
+.formTotalCost {
+    font-size:1.2rem;
+    font-weight: bold;
+}
+
+.pdfViewer {
+    min-height: 300px;
+}
+
+.securityTips {
+    margin-top:10px;
+    font-size: 0.9rem;
+    color:#0f5132;
+}
+.securityTips ul {
+    margin:0px;
+    padding:0px 0px 0px 15px;
+}
+.securityTips li {
+    margin-top:4px;
+}
+
+.btn-download {
+    width:100%;
+}
+.numberSpan {
+    padding:4px 10px;
+    margin-right: 4px;
+    color:#fff;
+    background-color: #333;
+    -webkit-border-radius: 15%;
+    -moz-border-radius: 15%;
+    border-radius: 15%;
+}
+
+.invoiceTotalWrapper {
+    font-size: 1.2rem;
+    padding:0px 0px 20px 0px;
+    margin-bottom:10px;
+}
+
+.invoiceDetails {
+
+    padding:6px 10px;
+    border-bottom:1px solid #ccc;
+}
+.invoiceRow {
+    display: flex;
+    flex:1;
+    flex-direction: row;
+    justify-content: space-between;
+    padding:6px 10px;
+}
+
+.costSummary {
+    padding-left: 20px;
+    flex:1;
+    display:flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+}
+.pagebreak {
+    page-break-after: always;
+    /*margin-top: 100px;*/
+}
+
+
+.printPage {
+    page-break-before: always;
+    overflow:hidden;
+    height: auto !important;
+    overflow: initial !important;
+
+}
+
+@media screen {
+    .contentToPrint {
+        display:none;
+    }
+}
+
+
+/* large devices */
+@media (min-width: 768px) {
+
+}
+
+/* Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) and (max-width: 767.98px) {
+
+}
+
+/* Extra small devices (portrait phones, less than 576px) */
+@media (max-width: 575.98px) {
+    .progressBarWrapper {
+        display:none;
+    }
+}
