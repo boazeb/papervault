@@ -178,8 +178,9 @@
 .navbar-collapse {
     background: #0a0a0a;
     border-top: 1px solid #333333;
-    margin-top: 0.5rem;
-    padding-top: 1rem;
+    margin-top: 0.35rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
     border-radius: 0 0 12px 12px;
 }
 
@@ -207,10 +208,10 @@
         border-bottom: none;
     }
     .nav-item .nav-link {
-        font-size: 1rem;
-        padding: 0.5rem 0.5rem;
+        font-size: 0.95rem;
+        padding: 0.4rem 0.5rem;
         color: #ffffff !important;
-        margin: 0.2rem 0;
+        margin: 0.1rem 0;
     }
     .nav-item .nav-link:hover {
         color: #66bb6a !important;
@@ -219,8 +220,8 @@
         color: #66bb6a !important;
     }
     .modern-nav {
-        gap: 0.5rem;
-        padding: 1rem 0;
+        gap: 0.25rem;
+        padding: 0.5rem 0;
     }
 }
 
@@ -236,10 +237,10 @@
     padding: 0 1.5rem;
 }
 
-/* Mobile responsive padding */
+/* Mobile responsive – condensed navbar */
 @media (max-width: 768px) {
     .navbar-container {
-        padding: 0 1rem;
+        padding: 0 0.75rem;
     }
     
     .navbarWrapper {
@@ -250,11 +251,32 @@
         z-index: 1050;
         background: rgba(10, 10, 10, 0.95) !important;
         backdrop-filter: blur(10px);
+        padding: 0.4rem 0 !important;
     }
     
-    /* Homepage navbar stays transparent on mobile too */
+    .navbarCustom.modern-navbar {
+        padding: 0.25rem 0 !important;
+    }
+    
+    .navbarLogo {
+        font-size: 1rem !important;
+    }
+    
+    .navbarLogo img {
+        max-width: 22px !important;
+    }
+    
+    .navbarWrapper .navbar-toggler {
+        padding: 0.35rem !important;
+    }
+    
+    .navbarWrapper .navbar-toggler svg {
+        font-size: 1.4rem !important;
+    }
+    
+    /* Homepage navbar stays transparent on mobile (match desktop) */
     .home-page-navbar .navbarWrapper {
-        background: rgba(10, 10, 10, 0.8) !important;
+        background: transparent !important;
     }
 }
 

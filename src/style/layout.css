@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    padding-top: 80px;
+    padding-top: 60px;
 }
 
 /* Main content grows to push footer to bottom (flexbox, no fixed/absolute) */
@@ -22,7 +22,7 @@
 /* Mobile adjustments */
 @media (max-width: 768px) {
     .layoutWrapper {
-        padding-top: 70px;
+        padding-top: 50px;
     }
     
     .layoutWrapper:has(.home-page-navbar) {
