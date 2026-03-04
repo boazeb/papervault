@@ -395,10 +395,11 @@
     padding: 2rem;
 }
 
-/* When not in preparation step, align content to top */
+/* When not in preparation step, align content to top; extra top padding so camera doesn't sit under navbar */
 .content-container.scanning-mode {
     justify-content: flex-start;
     align-items: stretch;
+    padding-top: 1.5rem;
 }
 
 .content-header {
@@ -869,10 +870,11 @@
     padding: 0;
 }
 
-/* When not in preparation step, align content to top */
+/* When not in preparation step, align content to top; extra top padding so camera doesn't sit under navbar */
 .content-container.scanning-mode {
     justify-content: flex-start;
     align-items: stretch;
+    padding-top: 1.5rem;
 }
 
 .content-header {

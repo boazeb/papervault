@@ -398,6 +398,7 @@ function CreateVault(props) {
                                             <input 
                                                 name="vaultName" 
                                                 type="text" 
+                                                autoComplete="off"
                                                 placeholder={'Vault Name'}
                                                 onChange={(e) => setVaultNameValue(e.target.value)}
                                                 value={vaultName}

@@ -286,8 +286,11 @@
     }
 }
 
-/* Override ALL Bootstrap navbar internal padding */
+/* Override ALL Bootstrap navbar internal padding and height */
 .navbarWrapper .navbar {
+    min-height: 0 !important;
+    padding-top: 5px !important;
+    padding-bottom: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
 }
@@ -295,10 +298,14 @@
 .navbarWrapper .navbar > .container-fluid {
     padding-left: 0 !important;
     padding-right: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: 0 !important;
 }
 
-/* Ensure logo and burger are properly spaced */
+/* Ensure logo and burger are properly spaced, no extra height from Bootstrap */
 .navbarWrapper .navbar-brand {
     margin-right: auto !important;
     padding: 0 !important;
+    min-height: 0 !important;
 }

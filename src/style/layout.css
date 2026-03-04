@@ -4,7 +4,8 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    padding-top: 60px;
+    /* Match navbar height (wrapper + inner padding + 5px content offset + content) – no gap below navbar */
+    padding-top: 61px;
 }
 
 /* Main content grows to push footer to bottom (flexbox, no fixed/absolute) */
@@ -19,7 +20,7 @@
     padding-top: 0;
 }
 
-/* Mobile adjustments */
+/* Mobile adjustments – tighter padding so no white gap below fixed navbar */
 @media (max-width: 768px) {
     .layoutWrapper {
         padding-top: 50px;
