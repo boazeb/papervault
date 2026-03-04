@@ -3342,6 +3342,30 @@
 
 /* Hide everything during print except the PDF components */
 @media print {
+    /* Zero wrapper padding/margin so mobile screen padding doesn't push content down */
+    body, html,
+    .layoutWrapper,
+    .createPageWrapper,
+    .createPageInnerWrapper,
+    .vault-download-wizard,
+    #idvaultbackup {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Fix width to A4 so mobile uses same column width as desktop (viewport-independent) */
+    body,
+    .layoutWrapper,
+    .createPageWrapper,
+    .createPageInnerWrapper,
+    .vault-download-wizard,
+    #idvaultbackup {
+        width: 210mm !important;
+        min-width: 210mm !important;
+        max-width: 210mm !important;
+        box-sizing: border-box;
+    }
+
     /* Hide only the wizard UI, not everything */
     .vault-download-wizard > .wizard-header,
     .vault-download-wizard > .vault-wizard-progress,
@@ -3383,6 +3407,15 @@
         print-color-adjust: exact !important;
     }
     
+    /* Explicitly show print content — required for Safari mobile which
+       doesn't fully switch out of @media screen (where .contentToPrint
+       is display:none) when printing. Without this, Safari mobile
+       prints a blank page. */
+    #idvaultbackup,
+    #idvaultbackup.contentToPrint {
+        display: block !important;
+    }
+
     /* Hide the duplicate keys div - this is the main culprit */
     #idkeybackup {
         display: none !important;
@@ -3396,13 +3429,15 @@
         overflow: visible !important;
     }
     
-    /* Ensure all child components are visible */
+    /* Ensure child components aren't height-constrained.
+       min-height: auto prevents the inline 297mm from overflowing the printable area
+       (which causes blank pages on mobile browsers that don't auto-scale).
+       NOTE: display and overflow are intentionally NOT overridden here —
+       the components use float layout + overflow:hidden for clearing. */
     #idvaultbackup > * {
         height: auto !important;
         max-height: none !important;
         min-height: auto !important;
-        overflow: visible !important;
-        display: block !important;
     }
     
     /* Remove page break constraints that might limit content */
@@ -3419,6 +3454,12 @@
         size: A4 !important;
         margin: 0.125in !important;
     }
+
+    /*
+     * Safari-specific print overrides are injected via react-to-print's
+     * pageStyle prop in CreateVault.jsx (not here), because react-to-print
+     * renders content in an iframe whose <body> doesn't have our classes.
+     */
 }
 
 /* Quick Action Cards */

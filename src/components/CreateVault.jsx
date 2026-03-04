@@ -16,7 +16,7 @@ import SecretDataEntry from "../components/SecretDataEntry";
 import PDFVaultBackup from '../components/PDFVaultBackup';
 import PDFKeyBackup from "../components/PDFKeyBackup";
 import {useReactToPrint} from 'react-to-print';
-import Html2PDF from 'html2pdf.js';
+import html2pdf from 'html2pdf.js';
 import {Oval} from "react-loading-icons";
 import VaultDownloadSection from './VaultDownloadSection';
 import { getCurrentLimits, clearProSession } from '../config/limits';
@@ -259,20 +259,55 @@ function CreateVault(props) {
     };
 
 
+    // --- Browser print quirks ---
+    // Chrome (desktop & mobile): works with react-to-print's iframe approach
+    //   and the base @media print CSS in createPage.css.
+    // Safari desktop: react-to-print iframe works, BUT Safari ignores @page
+    //   margins (~20mm top clip) and can't handle forced 210mm widths. Fixed
+    //   by injecting overrides via pageStyle into the iframe.
+    // Safari mobile (iOS): react-to-print's iframe.contentWindow.print()
+    //   doesn't trigger the iOS system print dialog. Bypassed entirely by
+    //   calling window.print() on the main document; the @media print CSS
+    //   in createPage.css handles hiding UI and showing print content.
+    // Chrome on iOS (CriOS) / Firefox on iOS (FxiOS): excluded from Safari
+    //   detection since they use their own print wrappers despite sharing WebKit.
+    const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+    const isSafariMobile = isSafari && /iPhone|iPod/i.test(navigator.userAgent);
+
+    const safariPrintStyle = `
+        .contentToPrint { display: block !important; visibility: visible !important; }
+        @media print {
+            body, html, #idvaultbackup {
+                width: auto !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+            #idvaultbackup {
+                margin-top: 20mm !important;
+            }
+        }
+    `;
+
     const handlePrint = useReactToPrint({
         onPrintError: () => {},
         content: () => refBackupVaultPDF.current,
         removeAfterPrint: true,
+        ...(isSafari && !isSafariMobile && { pageStyle: safariPrintStyle }),
     });
 
     const doPrintVault = () => {
         setHasPressedVaultPrint(true);
-        handlePrint();
+        if (isSafariMobile) {
+            window.print();
+        } else {
+            handlePrint();
+        }
     };
     const handlePrintKeys = useReactToPrint({
         onPrintError: () => {},
         content: () => refBackupKeyPDF.current,
         removeAfterPrint: true,
+        ...(isSafari && !isSafariMobile && { pageStyle: safariPrintStyle }),
     });
 
     const doPrintKeys = () => {
@@ -300,13 +335,13 @@ function CreateVault(props) {
             />
             </div>
         );
-        const exporter = new Html2PDF(printElement, {filename:"PaperVault.xyz - Vault - "+vaultName+".pdf"}).set({
-            pagebreak: { before:'.pagebreak', mode: ['avoid-all', 'css', 'legacy'] },
-            margin: [10, 10, 10, 10], // Reduce margins for better fit
-            format: 'A4',
-            orientation: 'portrait'
-        });
-        await exporter.getPdf(true);
+        const opt = {
+            filename: "PaperVault.xyz - Vault - " + vaultName + ".pdf",
+            pagebreak: { before: '.pagebreak', mode: ['avoid-all', 'css', 'legacy'] },
+            margin: [10, 10, 10, 10],
+            jsPDF: { format: 'a4', orientation: 'portrait' }
+        };
+        await html2pdf().set(opt).from(printElement, 'string').save();
     };
 
     const downloadKey = async (share, i) => {
@@ -326,10 +361,11 @@ function CreateVault(props) {
             </div>
         );
 
-        const exporter = new Html2PDF(printElement, {filename:"papervault-key-"+keyAliasArray[i]+".pdf"}).set({
-            pagebreak: { before:'.pagebreak', mode: ['avoid-all', 'css', 'legacy'] }
-        });
-        await exporter.getPdf(true);
+        const opt = {
+            filename: "papervault-key-" + keyAliasArray[i] + ".pdf",
+            pagebreak: { before: '.pagebreak', mode: ['avoid-all', 'css', 'legacy'] }
+        };
+        await html2pdf().set(opt).from(printElement, 'string').save();
     };
 
 

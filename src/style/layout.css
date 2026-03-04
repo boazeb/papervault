@@ -29,3 +29,11 @@
         padding-top: 0;
     }
 }
+
+/* Print: no top padding so content starts at top of page (fixes mobile print) */
+@media print {
+    .layoutWrapper {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+}

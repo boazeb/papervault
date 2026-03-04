@@ -93,14 +93,12 @@ const PDFVaultBackup = (props) => {
             boxSizing: 'border-box',
         },
         page: {
-            flexDirection: 'column',
             backgroundColor: '#fff',
-            flex: 1,
             width: '100%',
             height: props.qrtype === 'downloadable' ? 'auto' : '100%',
             padding: 0,
-            flexGrow: 1,
-            display: 'flex',
+            display: props.qrtype === 'downloadable' ? 'flex' : 'block',
+            ...(props.qrtype === 'downloadable' ? { flexDirection: 'column', flex: 1, flexGrow: 1 } : {}),
             position: 'relative',
             boxSizing: 'border-box',
             overflow: 'hidden',
@@ -557,18 +555,16 @@ const PDFVaultBackup = (props) => {
             <div style={styles.page}>
                 {/* Main content area with elevated QR code */}
                 <div style={{
-                    display: 'flex',
-                    flexDirection: 'row',
+                    ...(props.qrtype === 'downloadable'
+                        ? { display: 'flex', flexDirection: 'row', gap: '20px', flex: 1 }
+                        : { overflow: 'hidden' }),
                     padding: props.qrtype === 'downloadable' ? '15px' : '20px',
-                    gap: props.qrtype === 'downloadable' ? '20px' : '40px',
-                    flex: 1
                 }}>
                     {/* Left side - QR Code elevated */}
                     <div style={{
-                        flex: '0 0 320px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center'
+                        ...(props.qrtype === 'downloadable'
+                            ? { flex: '0 0 320px', display: 'flex', flexDirection: 'column', alignItems: 'center' }
+                            : { float: 'left', width: '320px', marginRight: '40px', textAlign: 'center' }),
                     }}>
                         {renderQR(qrArray[0][0], 0, 0)}
                         <div style={{
@@ -585,18 +581,15 @@ const PDFVaultBackup = (props) => {
                         
                     </div>
                     
-                                            {/* Right side - ASCII art and information */}
-                        <div style={{
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: props.qrtype === 'downloadable' ? '12px' : '20px'
-                        }}>
+                    {/* Right side - ASCII art and information */}
+                    <div style={{
+                        ...(props.qrtype === 'downloadable'
+                            ? { flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }
+                            : { overflow: 'hidden' }),
+                    }}>
                         {/* Header section */}
                         <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
+                            overflow: 'hidden',
                             marginBottom: '20px'
                         }}>
                             <h1 style={{
@@ -604,17 +597,17 @@ const PDFVaultBackup = (props) => {
                                 fontWeight: 'bold',
                                 color: '#2c3e50',
                                 margin: '4px 0px 0px 0px',
-                                fontFamily: 'Helvetica-Bold'
+                                fontFamily: 'Helvetica-Bold',
+                                float: 'left'
                             }}>
                                 PAPERVAULT.XYZ VAULT
                             </h1>
-                            {renderColorBoxes()}
+                            <div style={{ float: 'right' }}>{renderColorBoxes()}</div>
                         </div>
                         
                         {/* ASCII art */}
                         <div style={{
-                            display: 'flex',
-                            justifyContent: 'center',
+                            textAlign: 'center',
                             fontFamily: 'monospace',
                             fontSize: 11,
                             color: '#2c3e50',
@@ -635,7 +628,8 @@ const PDFVaultBackup = (props) => {
                             backgroundColor: '#f8f9fa',
                             padding: '20px',
                             borderRadius: '8px',
-                            border: '1px solid #e9ecef'
+                            border: '1px solid #e9ecef',
+                            marginTop: props.qrtype === 'printable' ? '20px' : 0
                         }}>
                             <h3 style={{
                                 fontSize: 18,
@@ -676,7 +670,8 @@ const PDFVaultBackup = (props) => {
                             backgroundColor: '#fff',
                             padding: '20px',
                             borderRadius: '8px',
-                            border: '1px solid #e9ecef'
+                            border: '1px solid #e9ecef',
+                            marginTop: props.qrtype === 'printable' ? '20px' : 0
                         }}>
                             <h3 style={{
                                 fontSize: 18,
@@ -722,7 +717,8 @@ const PDFVaultBackup = (props) => {
                             backgroundColor: '#fff3cd',
                             padding: '15px',
                             borderRadius: '8px',
-                            border: '1px solid #ffeaa7'
+                            border: '1px solid #ffeaa7',
+                            marginTop: props.qrtype === 'printable' ? '20px' : 0
                         }}>
                             <div style={{
                                 fontSize: 16,

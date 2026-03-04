@@ -45,6 +45,7 @@ const PDFKeyBackup = (props) => {
             flex: 0,
             flexGrow: 0,
             width: '100%',
+            minHeight: '297mm', // A4 height - ensures inner height:100% resolves on mobile print
             maxHeight: '297mm', // A4 height
             boxSizing: 'border-box',
             margin: 0,
@@ -68,14 +69,12 @@ const PDFKeyBackup = (props) => {
             breakBefore: 'page',
         },
         page: {
-            flexDirection: 'column',
             backgroundColor: '#fff',
-            flex: 0,
             width: '100%',
-            height: '100%', // Don't set explicit height for downloadable
+            height: '100%',
             padding: 0,
-            flexGrow: 0,
-            display: 'flex',
+            display: props.qrtype === 'downloadable' ? 'flex' : 'block',
+            ...(props.qrtype === 'downloadable' ? { flexDirection: 'column', flex: 0, flexGrow: 0 } : {}),
             position: 'relative',
             boxSizing: 'border-box',
             overflow: 'hidden',
@@ -347,18 +346,16 @@ Key Alias:          `}
             <div style={styles.page}>
                 {/* Main content area with QR code in top-left */}
                 <div style={{
-                    display: 'flex',
-                    flexDirection: 'row',
+                    ...(props.qrtype === 'downloadable'
+                        ? { display: 'flex', flexDirection: 'row', gap: '40px', flex: 1 }
+                        : { overflow: 'hidden' }),
                     padding: '20px',
-                    gap: '40px',
-                    flex: 1
                 }}>
                     {/* Left side - QR Code */}
                     <div style={{
-                        flex: '0 0 320px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center'
+                        ...(props.qrtype === 'downloadable'
+                            ? { flex: '0 0 320px', display: 'flex', flexDirection: 'column', alignItems: 'center' }
+                            : { float: 'left', width: '320px', marginRight: '40px', textAlign: 'center' }),
                     }}>
                         <div style={styles.QRCodeContainer}>
                             {props.qrtype === 'printable' ?
@@ -395,16 +392,13 @@ Key Alias:          `}
                     
                     {/* Right side - ASCII art and information */}
                     <div style={{
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '20px'
+                        ...(props.qrtype === 'downloadable'
+                            ? { flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }
+                            : { overflow: 'hidden' }),
                     }}>
                         {/* Header section */}
                         <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
+                            overflow: 'hidden',
                             marginBottom: '20px'
                         }}>
                             <h1 style={{
@@ -412,28 +406,28 @@ Key Alias:          `}
                                 fontWeight: 'bold',
                                 color: '#2c3e50',
                                 margin: 0,
-                                fontFamily: 'Helvetica-Bold'
+                                fontFamily: 'Helvetica-Bold',
+                                float: 'left'
                             }}>
                                 PAPERVAULT.XYZ KEY
                             </h1>
-                            {renderColorBoxes()}
+                            <div style={{ float: 'right' }}>{renderColorBoxes()}</div>
                         </div>
                         
                         {/* ASCII art */}
                         <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            marginBottom: '20px'
+                            textAlign: 'center',
+                            marginBottom: '20px',
+                            marginTop: props.qrtype === 'printable' ? '20px' : 0
                         }}>
                             <div style={{
-                                display: 'flex',
-                                justifyContent: 'center',
                                 fontFamily: 'monospace',
                                 fontSize: 11,
                                 color: '#2c3e50',
                                 lineHeight: 1.1,
-                                whiteSpace: 'pre'
+                                whiteSpace: 'pre',
+                                display: 'inline-block',
+                                textAlign: 'left'
                             }}>
                                 {` ██╗  ██╗███████╗██╗   ██╗
  ██║ ██╔╝██╔════╝╚██╗ ██╔╝
@@ -459,7 +453,8 @@ Key Alias:          `}
                             backgroundColor: '#f8f9fa',
                             padding: '20px',
                             borderRadius: '8px',
-                            border: '1px solid #e9ecef'
+                            border: '1px solid #e9ecef',
+                            marginTop: props.qrtype === 'printable' ? '20px' : 0
                         }}>
                             <h3 style={{
                                 fontSize: 18,
@@ -499,7 +494,8 @@ Key Alias:          `}
                             backgroundColor: '#fff',
                             padding: '20px',
                             borderRadius: '8px',
-                            border: '1px solid #e9ecef'
+                            border: '1px solid #e9ecef',
+                            marginTop: props.qrtype === 'printable' ? '20px' : 0
                         }}>
                             <h3 style={{
                                 fontSize: 18,
@@ -527,7 +523,8 @@ Key Alias:          `}
                             backgroundColor: '#fff3cd',
                             padding: '15px',
                             borderRadius: '8px',
-                            border: '1px solid #ffeaa7'
+                            border: '1px solid #ffeaa7',
+                            marginTop: props.qrtype === 'printable' ? '20px' : 0
                         }}>
                             <div style={{
                                 fontSize: 16,

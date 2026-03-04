@@ -39,6 +39,7 @@ const VaultDownloadSection = ({
         clearProSession();
     }, []);
 
+
     // Auto-scroll to top when step changes
     useEffect(() => {
         // Only scroll if user has scrolled down (more than 100px from top)
