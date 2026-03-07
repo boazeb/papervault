@@ -5,6 +5,8 @@
 
 **PaperVault.xyz** is a free open source tool that lets you create secure paper-based cold storage vaults for your digital assets, passwords, 2FA recovery codes, and other critical data.
 
+![PaperVault vault and key cards](src/images/papervault.jpg)
+
 ## 🔐 What is PaperVault.xyz?
 
 PaperVault.xyz uses [Shamir's Secret Sharing](https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing) to split your secrets into multiple paper keys with configurable thresholds. For example, you can create 5 keys where any 3 are needed to recover your secret (3-of-5 threshold).
