@@ -15,17 +15,8 @@ function CreateMintKeys(props) {
     const setShareholders = (val) => {
         setTotalShareholders(val);
         props.setShareholders(val);
-        
-        // Handle consensus adjustment based on library constraints
-        let newConsensus;
-        if (val === 1) {
-            // Single key - consensus must be 1
-            newConsensus = 1;
-        } else {
-            // Multiple keys - secrets.js library requires minimum threshold of 2
-            newConsensus = Math.max(2, Math.min(consensus, val));
-        }
-        
+        // Minimum threshold 2 (v2 vaults require at least 2 keys; 1-of-1 is not supported)
+        const newConsensus = Math.max(2, Math.min(consensus, val));
         setConsensus(newConsensus);
         props.setConsensus(newConsensus);
     };
@@ -61,38 +52,20 @@ function CreateMintKeys(props) {
 
 
                     <div className="number-selector">
-                        {Array.from({length: 20}, (_, i) => i + 1).map(num => {
+                        {Array.from({length: 19}, (_, i) => i + 2).map(num => {
                             return (
                                 <button
                                     key={num}
                                     type="button"
                                     className={`number-btn ${totalShareholders === num ? 'active' : ''}`}
                                     onClick={() => setShareholders(num)}
-                                    title={`${num} key${num !== 1 ? 's' : ''}`}
+                                    title={`${num} keys`}
                                 >
                                     {num}
                                 </button>
                             );
                         })}
                     </div>
-
-                    {/* Explanation for 1 key */}
-                    {totalShareholders === 1 && (
-                        <div className="key-config-section" style={{ marginTop: '1rem' }}>
-                            <div style={{
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '6px',
-                                padding: '0.75rem',
-                                fontSize: '0.85rem',
-                                color: '#b0b0b0',
-                                textAlign: 'left'
-                            }}>
-                                <span className="config-label config-label--not-recommended">This setting is not recommended</span>{' '}
-                                You will only have one key. Additional keys are recommended for redundancy.
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* Explanation for 2 keys */}
@@ -142,14 +115,14 @@ function CreateMintKeys(props) {
                                 </button>
                             ))}
                         </div>
-                        <p className="config-help">
+                        <div className="config-help">
                             {(consensus === 2 && totalShareholders === 3) || (consensus === 3 && totalShareholders === 5)
                                 ? <><span className="config-label config-label--recommended">Recommended</span>{' '}{consensus} out of {totalShareholders} keys will be needed to unlock your vault</>
                                 : consensus === totalShareholders
-                                ? <div><FaExclamationTriangle style={{ color: '#f44336', fontSize: '1.1rem', marginRight: '0.5rem' }} /> Requiring all keys is risky if you lose any</div>
-                                : <div><FaCheckCircle style={{ color: '#4caf50', fontSize: '1.1rem', marginRight: '0.5rem' }} /> {consensus} out of {totalShareholders} keys will be needed to unlock your vault</div>
+                                ? <span><FaExclamationTriangle style={{ color: '#f44336', fontSize: '1.1rem', marginRight: '0.5rem' }} /> Requiring all keys is risky if you lose any</span>
+                                : <span><FaCheckCircle style={{ color: '#4caf50', fontSize: '1.1rem', marginRight: '0.5rem' }} /> {consensus} out of {totalShareholders} keys will be needed to unlock your vault</span>
                             }
-                        </p>
+                        </div>
                     </div>
                 )}
 

@@ -49,10 +49,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## 🛡️ Security Model
 
 ### Cryptographic Foundation
-- **Algorithm**: Shamir's Secret Sharing over GF(2^8)
-- **Encryption**: AES-256 encryption for vault data
-- **Key Generation**: Cryptographically secure random number generation
-- **QR Codes**: Version 6-8 QR codes for optimal scanning reliability
+- **Algorithm**: Shamir's Secret Sharing over GF(2^8). Vaults use [shamir-secret-sharing](https://github.com/privy-io/shamir-secret-sharing) (Privy), independently audited by Cure53 and Zellic.
+- **Encryption**: AES-256-GCM (authenticated) for v2 vaults via the Web Crypto API; legacy v1 vaults use AES-256-CTR and remain supported for unlock.
+- **Key Generation**: Cryptographically secure random number generation via `crypto.getRandomValues()` (Web Crypto API).
+- **QR Codes**: Version 6-8 QR codes for optimal scanning reliability.
+
+See [SECURITY.md](SECURITY.md) for detailed cryptographic details, vault versions, and vulnerability reporting.
 
 ### Security Best Practices
 1. **Air-Gapped Usage**: Run PaperVault.xyz from an offline computer for maximum security

@@ -89,7 +89,7 @@ const UnlockedVault = ({ decryptionResult, onClose }) => {
                     className="close-vault-button"
                 >
                     <FaTrash className="me-2" />
-                    Close and Clear
+                    Close
                 </Button>
             </div>
         </div>

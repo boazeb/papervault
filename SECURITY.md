@@ -1,21 +1,17 @@
 # Security Policy
 
-## Supported Versions
-
-| Version | Supported          |
-| ------- | ------------------ |
-| Latest  | :white_check_mark: |
-
 ## Security Model
 
 ### Cryptographic Implementation
 
-PaperVault.xyz uses industry-standard cryptographic primitives:
+PaperVault.xyz uses industry-standard cryptographic primitives. New vaults (version 2) use the following:
 
-- **Secret Sharing**: Shamir's Secret Sharing over GF(2^8)
-- **Encryption**: AES-256 for vault data encryption
-- **Random Generation**: Cryptographically secure random number generation
-- **Key Derivation**: Standard key derivation functions
+- **Secret Sharing**: Shamir's Secret Sharing over GF(2^8) via [shamir-secret-sharing](https://github.com/privy-io/shamir-secret-sharing) (Privy; independently audited by Cure53 and Zellic)
+- **Encryption**: AES-256-GCM for vault data (authenticated encryption) via the Web Crypto API
+- **Random Generation**: `crypto.getRandomValues()` (Web Crypto API) for all key, nonce, and salt generation
+- **Key Generation**: Direct 256-bit random key
+
+Legacy vaults (version 1) remain supported for decryption; see "Known limitations of vault version 1" below.
 
 ### Trust Model
 
@@ -52,23 +48,31 @@ Your actual security depends on how and where you use PaperVault.xyz. For exampl
 
 ## Cryptographic Details
 
+### Vault versions
+
+- **Version 2 (current)**: New vaults use AES-256-GCM (Web Crypto API), a 256-bit random key (no KDF), and [shamir-secret-sharing](https://github.com/privy-io/shamir-secret-sharing) for key splitting. RNG is `crypto.getRandomValues()` only. Ciphertext is authenticated (AEAD).
+- **Version 1 (legacy)**: AES-256-CTR, PBKDF2 with random salt, secrets.js for Shamir. Supported for decryption only; no new v1 vaults are created.
+
 ### Shamir's Secret Sharing
 - **Field**: GF(2^8) - Galois Field with 256 elements
-- **Polynomial**: Random polynomial of degree (threshold - 1)
-- **Shares**: Each share is a point on the polynomial
-- **Reconstruction**: Lagrange interpolation for secret recovery
+- **V2**: [shamir-secret-sharing](https://github.com/privy-io/shamir-secret-sharing) (Privy; audited by Cure53 and Zellic)
+- **V1**: secrets.js (legacy)
 
 ### AES Encryption
-- **Algorithm**: AES-256 in CTR mode
-- **Key Generation**: PBKDF2 with random salt (for vault creation); key is split via Shamir's Secret Sharing
-- **IV**: Cryptographically random initialization vector (16 bytes)
-- **Padding**: None (CTR is a stream-cipher mode and does not require padding)
-- **Integrity**: Current design provides confidentiality only; ciphertext is not authenticated. Tampering with stored or printed ciphertext may alter decrypted data undetected.
+- **V2**: AES-256-GCM (Web Crypto API). 12-byte nonce, 128-bit auth tag. Confidentiality and authenticity.
+- **V1 (legacy)**: AES-256-CTR, 16-byte IV, no authentication. Confidentiality only; ciphertext is malleable.
 
 ### Random Number Generation
-- **Source**: `crypto.getRandomValues()` Web Crypto API
-- **Fallback**: High-entropy sources where available
-- **Validation**: Entropy testing for random number quality
+- **V2**: `crypto.getRandomValues()` (Web Crypto API) only. No fallback.
+- **V1 (legacy)**: Historically used a different RNG; v1 is no longer used for new vaults.
+
+### Known limitations of vault version 1
+
+Vaults created with version 1 remain supported for unlock but have the following limitations:
+
+- **No authenticated encryption**: Ciphertext is not authenticated; tampering may alter decrypted data undetected.
+- **Legacy stack**: RNG and crypto libraries used for v1 are not used for new vaults; v1 is retained only for backward compatibility.
+- **Recommendation**: Create new vaults as version 2. Migrate important secrets from v1 vaults to new v2 vaults when practical.
 
 ## Reporting Security Vulnerabilities
 

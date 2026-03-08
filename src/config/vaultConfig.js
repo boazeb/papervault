@@ -5,15 +5,18 @@
  * including version information and cryptographic parameters.
  */
 
-// Current vault version
-export const CURRENT_VAULT_VERSION = '1';
+// Current vault version (new vaults use v2)
+export const CURRENT_VAULT_VERSION = '2';
 
 // Vault version definitions
 export const VAULT_VERSIONS = {
     '1': {
         algorithm: 'AES-256-CTR',
         kdf: 'PBKDF2',
-        
+    },
+    '2': {
+        algorithm: 'AES-256-GCM',
+        kdf: 'none',
     }
 };
 

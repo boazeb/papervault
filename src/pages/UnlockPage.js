@@ -268,48 +268,38 @@ function UnlockPage() {
         }
 
         // All validations passed - proceed with decryption
-        if (metadata.threshold===1) {
-            if (!unlockShares[0]) {
-                alert('Invalid unlock key data. Please scan key QR again.');
+        const getCipherKey = () => {
+            if (metadata.threshold === 1) {
+                if (!unlockShares[0]) {
+                    return Promise.reject(new Error('Invalid unlock key data. Please scan key QR again.'));
+                }
+                // V2 with one share: the share is a shamir share, combine to get key. V1: the single "share" is the raw key.
+                if (metadata.version === '2') {
+                    return EncryptionService.combineShares([unlockShares[0]], metadata.version);
+                }
+                return Promise.resolve(unlockShares[0]);
+            }
+            return EncryptionService.combineShares(unlockShares, metadata.version);
+        };
+
+        getCipherKey().then((cipherKey) => {
+            if (!cipherKey) {
+                alert('Failed to combine unlock keys. Please scan key QR codes again.');
                 return;
             }
-
-            EncryptionService.decrypt(
+            return EncryptionService.decrypt(
                 cipherData,
-                unlockShares[0],
+                cipherKey,
                 metadata.cipherIV,
-                metadata.version 
+                metadata.version
             ).then((decryptionResult) => {
                 setUnlocked(true);
                 setDecryptionResult(decryptionResult);
-            }).catch(error => {
-                alert('Decryption failed: ' + error.message + '\n\nPlease verify you scanned the correct vault and key QR codes.');
-                setUnlocked(false);
             });
-        } else {
-            EncryptionService.combineShares(unlockShares).then((cipherKey) => {
-                if (!cipherKey) {
-                    alert('Failed to combine unlock keys. Please scan key QR codes again.');
-                    return;
-                }
-
-                EncryptionService.decrypt(
-                    cipherData,
-                    cipherKey,
-                    metadata.cipherIV,
-                    metadata.version 
-                ).then((decryptionResult) => {
-                    setUnlocked(true);
-                    setDecryptionResult(decryptionResult);
-                }).catch(error => {
-                    alert('Decryption failed: ' + error.message + '\n\nPlease verify you scanned the correct vault and key QR codes.');
-                    setUnlocked(false);
-                });
-            }).catch(error => {
-                alert('Failed to combine unlock keys: ' + error.message);
-                setUnlocked(false);
-            });
-        }
+        }).catch(error => {
+            alert((error.message || 'Decryption failed') + '\n\nPlease verify you scanned the correct vault and key QR codes.');
+            setUnlocked(false);
+        });
     };
 
 

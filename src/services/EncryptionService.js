@@ -1,9 +1,12 @@
 import secrets from 'secrets.js';
+import { split as shamirSplit, combine as shamirCombine } from 'shamir-secret-sharing';
 import { CURRENT_VAULT_VERSION, VAULT_VERSIONS } from '../config/vaultConfig';
 import { LIMITS } from '../config/limits';
 
 const CryptoJS = require("crypto-js");
 const bip39 = require('bip39');
+
+const GCM_NONCE_BYTES = 12;
 
 // Validation constants for decrypt inputs
 const IV_BYTES = 16;
@@ -11,6 +14,48 @@ const KEY_BYTES = 32;
 const MAX_CIPHERTEXT_HEX_LENGTH = 2 * 1024 * 1024; // 2MB hex = 1MB plaintext max
 
 const HEX_REGEX = /^[0-9a-fA-F]+$/;
+
+/**
+ * Cryptographically secure random bytes using Web Crypto API.
+ * Required for all key/IV/nonce/salt generation. No fallback to Math.random.
+ * @param {number} length - Number of bytes to generate
+ * @returns {Uint8Array}
+ */
+function secureRandomBytes(length) {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        return crypto.getRandomValues(new Uint8Array(length));
+    }
+    throw new Error('secureRandomBytes: crypto.getRandomValues is not available. Use a supported browser.');
+}
+
+function hexToUint8Array(hex) {
+    if (typeof hex !== 'string' || hex.length % 2 !== 0) {
+        throw new Error('hexToUint8Array: hex string must have even length.');
+    }
+    const len = hex.length / 2;
+    const out = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+    }
+    return out;
+}
+
+function uint8ArrayToHex(arr) {
+    return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function uint8ArrayToWordArray(arr) {
+    const words = [];
+    for (let i = 0; i < arr.length; i += 4) {
+        words.push(
+            (arr[i] << 24) |
+            ((arr[i + 1] || 0) << 16) |
+            ((arr[i + 2] || 0) << 8) |
+            (arr[i + 3] || 0)
+        );
+    }
+    return CryptoJS.lib.WordArray.create(words, arr.length);
+}
 
 function validateHexInput(value, label, exactBytes, maxHexLength) {
     if (typeof value !== 'string' || value.length === 0) {
@@ -38,18 +83,49 @@ export class EncryptionService {
         return CryptoJS.SHA256(dataToHash).toString();
     };
 
-    static encrypt = async (dataToEncrypt, password) => {
-
-        let salt        = CryptoJS.lib.WordArray.random(16);
-        let passphrase  = CryptoJS.lib.WordArray.random(16);
-        let iv          = CryptoJS.lib.WordArray.random(16);
-
-        // NOTE: The app does not use the password path. Vault creation always calls encrypt(..., false).
-        // If this path is ever used, passphrase and salt must not both be set to password (weak KDF).
-        if (password) {
-            passphrase  = password;
-            salt        = password;
+    /**
+     * V2 encryption: Web Crypto AES-256-GCM, random key (no PBKDF2).
+     * Returns cipherText (hex), cipherKey (hex), cipherIV (nonce hex), version '2'.
+     */
+    static encryptV2 = async (dataToEncrypt) => {
+        if (typeof dataToEncrypt !== 'string') {
+            throw new Error('Secret data must be a string.');
         }
+        const keyBytes = secureRandomBytes(32);
+        const nonce = secureRandomBytes(GCM_NONCE_BYTES);
+        const key = await crypto.subtle.importKey(
+            'raw',
+            keyBytes,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt']
+        );
+        const encoded = new TextEncoder().encode(dataToEncrypt);
+        const ciphertextWithTag = await crypto.subtle.encrypt(
+            { name: 'AES-GCM', iv: nonce, tagLength: 128 },
+            key,
+            encoded
+        );
+        return {
+            cipherText: uint8ArrayToHex(new Uint8Array(ciphertextWithTag)),
+            cipherKey: uint8ArrayToHex(keyBytes),
+            cipherIV: uint8ArrayToHex(nonce),
+            cipherOpenSSL: null,
+            version: '2'
+        };
+    };
+
+    static encrypt = async (dataToEncrypt, password) => {
+        if (typeof dataToEncrypt !== 'string') {
+            throw new Error('Secret data must be a string.');
+        }
+        if (!password) {
+            return EncryptionService.encryptV2(dataToEncrypt);
+        }
+
+        let salt        = uint8ArrayToWordArray(secureRandomBytes(16));
+        let passphrase  = uint8ArrayToWordArray(secureRandomBytes(16));
+        let iv          = uint8ArrayToWordArray(secureRandomBytes(16));
 
         const encryptionOptions = {
             iv      : iv,
@@ -59,10 +135,10 @@ export class EncryptionService {
         };
 
         const key = CryptoJS.PBKDF2(passphrase, salt, {
-            keySize: 256/32, 
+            keySize: 256/32,
             iterations: 100000
         });
-        
+
         const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, key, encryptionOptions);
 
         return {
@@ -70,14 +146,34 @@ export class EncryptionService {
             cipherKey: ciphertext.key.toString(CryptoJS.enc.Hex),
             cipherIV: ciphertext.iv.toString(CryptoJS.enc.Hex),
             cipherOpenSSL: ciphertext.toString(),
-            version: CURRENT_VAULT_VERSION
+            version: '1'
         };
     };
 
     static decrypt = async (dataToDecrypt, secretKey, iv, version = CURRENT_VAULT_VERSION) => {
-        // Version validation
         if (!VAULT_VERSIONS[version]) {
             throw new Error(`Unsupported vault version: ${version}. Please update your software.`);
+        }
+
+        if (version === '2') {
+            validateHexInput(iv, 'IV', GCM_NONCE_BYTES, null);
+            validateHexInput(secretKey, 'key', KEY_BYTES, null);
+            validateHexInput(dataToDecrypt, 'ciphertext', null, MAX_CIPHERTEXT_HEX_LENGTH);
+            const key = await crypto.subtle.importKey(
+                'raw',
+                hexToUint8Array(secretKey),
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['decrypt']
+            );
+            const nonce = hexToUint8Array(iv);
+            const ciphertextWithTag = hexToUint8Array(dataToDecrypt);
+            const plaintext = await crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv: nonce, tagLength: 128 },
+                key,
+                ciphertextWithTag
+            );
+            return new TextDecoder().decode(plaintext);
         }
 
         validateHexInput(iv, 'IV', IV_BYTES, null);
@@ -97,7 +193,7 @@ export class EncryptionService {
         return decrypted.toString(CryptoJS.enc.Utf8);
     };
 
-    static splitKey = async (secretKey, numberOfShares, threshold) => {
+    static splitKey = async (secretKey, numberOfShares, threshold, version = CURRENT_VAULT_VERSION) => {
         const MAX_SECRET_KEY_LENGTH = 2048;
 
         if (typeof secretKey !== 'string' || secretKey.length === 0) {
@@ -119,12 +215,21 @@ export class EncryptionService {
             throw new Error('Cryptographic library requires threshold >= 2 for multiple keys. Use single key instead.');
         }
 
+        if (version === '2') {
+            if (secretKey.length !== 64 || !HEX_REGEX.test(secretKey)) {
+                throw new Error('splitKey: for v2, secretKey must be 32-byte hex (64 characters).');
+            }
+            const secret = hexToUint8Array(secretKey);
+            const shareArrays = await shamirSplit(secret, n, t);
+            return shareArrays.map(arr => uint8ArrayToHex(arr));
+        }
+
         const pwHex = secrets.str2hex(secretKey);
         const shares = secrets.share(pwHex, n, t);
         return shares;
     };
 
-    static combineShares = async (shares) => {
+    static combineShares = async (shares, version = CURRENT_VAULT_VERSION) => {
         const MAX_SHARES = LIMITS.MAX_KEYS;
         const MAX_SHARE_LENGTH = 2048;
 
@@ -146,6 +251,25 @@ export class EncryptionService {
             }
         }
 
+        if (version === '2') {
+            for (let i = 0; i < shares.length; i++) {
+                const s = shares[i];
+                if (typeof s !== 'string' || s.length === 0) {
+                    throw new Error(`combineShares: share at index ${i} must be a non-empty string.`);
+                }
+                if (s.length % 2 !== 0 || !HEX_REGEX.test(s)) {
+                    throw new Error(`combineShares: share at index ${i} must be a valid hex string with even length.`);
+                }
+            }
+            try {
+                const shareArrays = shares.map(hex => hexToUint8Array(hex));
+                const secret = await shamirCombine(shareArrays);
+                return uint8ArrayToHex(secret);
+            } catch (error) {
+                throw new Error(`Failed to combine shares: ${error.message}`);
+            }
+        }
+
         try {
             const comb = secrets.combine(shares);
             return secrets.hex2str(comb);
@@ -156,16 +280,12 @@ export class EncryptionService {
 
 
 
-    static generateListOfCombinedWords =  (amount) => {
-
-        let  mnemonic = [];
-        let entropy;
+    static generateListOfCombinedWords = (amount) => {
+        const mnemonic = [];
         for (let i = 0; i < 4; i++) {
-            // Generate a random 128-bit entropy
-            entropy = CryptoJS.lib.WordArray.random(16);
-
-            // Convert the entropy to a mnemonic phrase
-            mnemonic.push(bip39.entropyToMnemonic(entropy.toString()).split(' '));
+            const entropyBytes = secureRandomBytes(16);
+            const entropyHex = Array.from(entropyBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+            mnemonic.push(bip39.entropyToMnemonic(entropyHex).split(' '));
         }
         let cleanWords = [];
 

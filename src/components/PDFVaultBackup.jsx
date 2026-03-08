@@ -6,7 +6,10 @@ import { StyleSheet, Image } from '@react-pdf/renderer';
 import { CURRENT_VAULT_VERSION } from '../config/vaultConfig';
 
 const PDFVaultBackup = (props) => {
-    if (!props.cipherText) return;
+    if (!props.cipherText) {
+        return null;
+    }
+
     const tmpQRArray = [];
     let canvas;
 
@@ -23,15 +26,13 @@ const PDFVaultBackup = (props) => {
             data: props.cipherText // Include the encrypted data directly
         });
 
-        // console.log('Combined vault data length:', combinedVaultData.length);
-        // console.log('Combined vault data preview:', combinedVaultData.substring(0, 200) + '...');
-
         canvas = document.createElement('canvas');
-        QRCode2.toCanvas(canvas, combinedVaultData, {
+        const toCanvasPromise = QRCode2.toCanvas(canvas, combinedVaultData, {
             errorCorrectionLevel: 'M',
             width: 250,  // Reduced from 320 to 250
             margin: 2
         });
+        toCanvasPromise.catch(() => {});
         tmpQRArray.push({qrCode:canvas.toDataURL(), id: 1, raw: combinedVaultData});
 
         // No longer need to chunk data since everything is in one QR code

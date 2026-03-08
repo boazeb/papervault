@@ -136,12 +136,9 @@ function CreateVault(props) {
     useEffect(()=>{
         if (wizardStep===5 && compressedSecretValue) {
             setTimeout(() => {
-                // Generate colors once when entering step 5 (encryption)
                 setVaultColors(generateColors());
-                
-                // Calculate pages based on compressed version
                 setTotalPages(calculateHowManyPages(compressedSecretValue));
-                             
+
                 EncryptionService.encrypt(compressedSecretValue, false).then((encryptionResult) => {
                     setCiphertext(encryptionResult.cipherText);
                     setCipherKey(encryptionResult.cipherKey);
@@ -149,13 +146,19 @@ function CreateVault(props) {
                     setCipherOpenSSL(encryptionResult.cipherOpenSSL);
                     setVaultIdent('papervault-coldstorage');
                     setCreatedTimestamp(Math.floor(Date.now() / 1000));
-                   
-                    if (parseInt(totalShareholders)>1) {
-                        EncryptionService.splitKey(encryptionResult.cipherKey, parseInt(totalShareholders), parseInt(consensus)).then((xshares) => {
-                            setShares(xshares);
-                        });
-                    } else {
+
+                    const n = parseInt(totalShareholders, 10);
+                    const t = parseInt(consensus, 10);
+                    const version = encryptionResult.version || '2';
+                    if (n === 1 && version === '1') {
                         setShares([encryptionResult.cipherKey]);
+                    } else {
+                        EncryptionService.splitKey(encryptionResult.cipherKey, n, t, version).then((xshares) => {
+                            setShares(xshares);
+                        }).catch((err) => {
+                            console.error('splitKey failed', err);
+                            alert('Failed to generate keys: ' + (err?.message || 'Please try again.'));
+                        });
                     }
                 });
             }, 1000);

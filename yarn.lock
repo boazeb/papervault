@@ -4005,7 +4005,7 @@ crypto-browserify@^3.12.0:
     randombytes "^2.1.0"
     randomfill "^1.0.4"
 
-crypto-js@^4.1.1, crypto-js@^4.2.0:
+crypto-js@^4.2.0:
   version "4.2.0"
   resolved "https://registry.npmjs.org/crypto-js/-/crypto-js-4.2.0.tgz"
   integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
@@ -9691,6 +9691,11 @@ sha.js@^2.4.0, sha.js@^2.4.12, sha.js@^2.4.8:
     inherits "^2.0.4"
     safe-buffer "^5.2.1"
     to-buffer "^1.2.0"
+
+shamir-secret-sharing@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.npmjs.org/shamir-secret-sharing/-/shamir-secret-sharing-0.0.4.tgz"
+  integrity sha512-ui8u/cIg2j16b9on/LH3V/glL6wHdwiTo/Iajzqx0STniBvuOzl6VYUxhrow3waF0dggovJfYiBZSWfTAN4XLQ==
 
 shebang-command@^2.0.0:
   version "2.0.0"
