@@ -109,7 +109,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [Shamir's Secret Sharing](https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing) algorithm by Adi Shamir
-- [secrets.js](https://github.com/grempe/secrets.js) library for JavaScript implementation
+- [shamir-secret-sharing](https://github.com/privy-io/shamir-secret-sharing) (v2 vaults)
+- [secrets.js](https://github.com/grempe/secrets.js) (legacy v1 vaults)
 - React and the open source community
 
 ## 📞 Support
@@ -130,4 +131,4 @@ This software is provided "as is" without warranty. Users are responsible for:
 
 ---
 
-**Made with ❤️ in Tel Aviv**
+**Made with ❤️ in Tel Aviv 🚀🕊️**
