@@ -15,7 +15,7 @@ Legacy vaults (version 1) remain supported for decryption; see "Known limitation
 
 ### Trust Model
 
-PaperVault.xyz operates under the following trust assumptions:
+PaperVault operates under the following trust assumptions:
 
 1. **Client-Side Execution**: All cryptographic operations occur in the user's browser
 2. **No Network Dependencies**: No external API calls or data transmission
@@ -24,22 +24,28 @@ PaperVault.xyz operates under the following trust assumptions:
 
 ### Threat Protection
 
-Your actual security depends on how and where you use PaperVault.xyz. For example, using it on an offline (air-gapped) computer can substantially reduce exposure to compromised software or hardware, since there is no way for data to leave the device.
+Your actual security depends on how and where you use PaperVault. For example, using it on an offline (air-gapped) computer can substantially reduce exposure to compromised software or hardware, since there is no way for data to leave the device.
 
-**PaperVault.xyz deployed offline protects against:**
+**PaperVault deployed offline protects against:**
 
 - Digital device compromise
 - Online data breaches
 - Single points of failure
 - Partial key loss (up to threshold)
 
-**PaperVault.xyz does NOT protect against:**
+**PaperVault does NOT protect against:**
 
 - Physical compromise of threshold number of keys
 - Side-channel attacks during secret entry
 - Social engineering attacks
 
 ### Security Best Practices
+
+#### Deployment: hosted vs self-hosted
+
+**Recommended:** Clone the repository and run PaperVault locally, ideally on an offline (air-gapped) device.
+
+Using the web version at **papervault.xyz** involves additional supply chain risk: you rely on the hosting provider, CDN, and any other infrastructure that delivers the site. The code is open source and auditable, but when you use the hosted version you do not control the exact code that is served. For maximum security, clone the repo, verify the source, and run offline.
 
 #### For Users
 
