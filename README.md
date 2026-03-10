@@ -1,7 +1,8 @@
 # PaperVault - Store secrets on paper using threshold encryption
 
-
 **PaperVault 📄🔐** is a free open source tool for creating offline paper-based data vaults for your foundational secrets, such as passwords, 2FA recovery codes, digital asset keys, hard drive encryption keys, and other critical data.
+
+![PaperVault vault and key cards](src/images/papervault.jpg)
 
 ## 🔐 Overview
 
