@@ -491,7 +491,7 @@ const PDFVaultBackup = (props) => {
                         <Image 
                             src={qrData.qrCode} 
                             style={styles.QRImage}
-                            alt={`QR Code ${qrData.id === 1 ? 'Metadata' : `Data Shard #${totalQRs-1}`}`}
+                            alt={`Vault QR ${qrData.id} of ${totalQRs}`}
                         />
                         :null
                     }

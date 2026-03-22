@@ -118,7 +118,7 @@ const VaultMetadata = ({ metadata, VAULT_VERSIONS, getClassType, getKeyClass, nu
                                 {index < numOfQRsScanned ? <FaCheck /> : <span className="item-number">{index + 1}</span>}
                             </div>
                             <div className="item-info">
-                                <span className="item-name">{index === 0 ? 'Metadata' : `Shard #${index}`}</span>
+                                <span className="item-name">{metadata.qrcodes === 1 ? 'Vault QR' : `Vault QR ${index + 1}`}</span>
                                 {index < numOfQRsScanned && <span className="item-status-text">Scanned</span>}
                                 {scanType === 'vault' && index === numOfQRsScanned && <span className="item-status-text scanning-text">Scanning...</span>}
                             </div>
