@@ -30,7 +30,14 @@ npm start
 yarn start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser. 
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Docker
+
+```bash
+docker build -t papervault .
+docker run -p 3000:3000 papervault
+```
 
 ## 🔑 Key Features
 
