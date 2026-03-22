@@ -80,7 +80,6 @@ const VaultDownloadSection = ({
     const downloadCompleted = vaultDownloaded && keysDownloaded.size === shares.length;
     const allCompleted = (preferredMethod === 'print' && printCompleted) || (preferredMethod === 'download' && downloadCompleted);
 
-    // Update the method selection to scroll after state change
     const handleMethodSelection = (method) => {
         setPreferredMethod(method);
         if (currentStep === 1) {
@@ -105,19 +104,6 @@ const VaultDownloadSection = ({
                         {index < 2 && <div className="step-connector"></div>}
                     </div>
                 ))}
-            </div>
-        </div>
-    );
-
-    // eslint-disable-next-line no-unused-vars -- reserved for future notice banner
-    const _renderImportantNotice = () => (
-        <div className="important-notice-banner">
-            <div className="notice-icon">
-                <FaLock />
-            </div>
-            <div className="notice-content">
-                <h4>📋 Important: Save Your Documents</h4>
-                <p>These backup documents are generated once. Make sure to save them before leaving this page.</p>
             </div>
         </div>
     );
@@ -342,7 +328,6 @@ const VaultDownloadSection = ({
             </div>
 
             {renderStepIndicator()}
-            {/* {renderImportantNotice()} */}
 
             {/* Step Content */}
             <div className="wizard-content">

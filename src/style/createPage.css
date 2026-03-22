@@ -3054,9 +3054,13 @@
     }
     
     .entry-card .card-body {
-        padding: 0.75rem !important;
+        padding: 0.5rem !important;
     }
-    
+
+    .entry-card .accordion-header {
+        padding: 0.4rem 0.5rem;
+    }
+
     .entry-card h6 {
         font-size: 0.9rem;
     }
@@ -3066,11 +3070,11 @@
         max-height: 300px;
     }
     
-    .d-flex.gap-2 {
+    .section-card .d-flex.gap-2 {
         flex-direction: column;
     }
-    
-    .d-flex.gap-2 .btn {
+
+    .section-card .d-flex.gap-2 .btn {
         width: 100%;
     }
 }

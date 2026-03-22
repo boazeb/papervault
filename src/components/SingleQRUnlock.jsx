@@ -17,9 +17,17 @@ const SingleQRUnlock = ({
     cameraManager,
     onManualEntry
 }) => {
-    // Get current scan instruction with detailed progress
+    const totalVaultQRs = metadata ? (metadata.data ? 1 : (metadata.qrcodes || 1)) : 1;
+
     const getScanInstruction = () => {
         if (scanType === 'vault') {
+            if (totalVaultQRs > 1 && numOfQRsScanned > 0) {
+                return (
+                    <span>
+                        <strong>Scan vault QR {numOfQRsScanned + 1} of {totalVaultQRs}</strong>
+                    </span>
+                );
+            }
             return (
                 <span>
                     <strong>Scan your vault QR code</strong>
@@ -127,42 +135,43 @@ const SingleQRUnlock = ({
                              
                              {/* Vault Status */}
                              <div className="progress-item-row">
-                                 <div className={`progress-item ${numOfQRsScanned > 0 ? 'completed' : 'pending'}`}>
-                                     {numOfQRsScanned > 0 ? (
-                                         <FaCheck className="check-icon" />
-                                     ) : (
-                                         <FaQrcode className="pending-icon" />
-                                     )}
-                                     <span>Vault Data</span>
-                                 </div>
+                                 {totalVaultQRs === 1 ? (
+                                     <div className={`progress-item ${numOfQRsScanned > 0 ? 'completed' : 'pending'}`}>
+                                         {numOfQRsScanned > 0 ? <FaCheck className="check-icon" /> : <FaQrcode className="pending-icon" />}
+                                         <span>Vault Data</span>
+                                     </div>
+                                 ) : (
+                                     Array.from({length: totalVaultQRs}, (_, i) => (
+                                         <div key={i} className={`progress-item ${numOfQRsScanned > i ? 'completed' : 'pending'}`}>
+                                             {numOfQRsScanned > i ? <FaCheck className="check-icon" /> : <FaQrcode className="pending-icon" />}
+                                             <span>Vault QR {i + 1}</span>
+                                         </div>
+                                     ))
+                                 )}
                              </div>
-                             
-                             {/* Keys Grid - Simplified */}
+
+                             {/* Keys Grid */}
                              <div className="keys-section">
                                  <div className="keys-header">
                                      <FaKey className="section-icon" />
                                      <span>Keys ({numOfQRKEYSsScanned}/{metadata.threshold})</span>
                                  </div>
-                                 
+
                                  <div className="keys-grid-simple">
                                      {metadata.keys && metadata.keys.map((keyAlias, index) => {
                                          const isScanned = scannedKeys.includes(keyAlias);
                                          return (
-                                             <div 
-                                                 key={index} 
+                                             <div
+                                                 key={index}
                                                  className={`key-item-simple ${isScanned ? 'completed' : ''}`}
                                              >
-                                                 {isScanned ? (
-                                                     <FaCheck className="check-icon" />
-                                                 ) : (
-                                                     <FaKey className="key-icon" />
-                                                 )}
+                                                 {isScanned ? <FaCheck className="check-icon" /> : <FaKey className="key-icon" />}
                                                  <span className="key-alias">{keyAlias}</span>
                                              </div>
                                          );
                                      })}
                                  </div>
-                                 
+
                                  <div className="keys-note-simple">
                                      Scan any {metadata.threshold} of {metadata.keys.length} keys
                                      {numOfQRKEYSsScanned > 0 && (
@@ -182,45 +191,46 @@ const SingleQRUnlock = ({
                          <div className="vault-name">
                              <strong>{metadata.name}</strong>
                          </div>
-                         
+
                          {/* Vault Status */}
                          <div className="progress-item-row">
-                             <div className={`progress-item ${numOfQRsScanned > 0 ? 'completed' : 'pending'}`}>
-                                 {numOfQRsScanned > 0 ? (
-                                     <FaCheck className="check-icon" />
-                                 ) : (
-                                     <FaQrcode className="pending-icon" />
-                                 )}
-                                 <span>Vault Data</span>
-                             </div>
+                             {totalVaultQRs === 1 ? (
+                                 <div className={`progress-item ${numOfQRsScanned > 0 ? 'completed' : 'pending'}`}>
+                                     {numOfQRsScanned > 0 ? <FaCheck className="check-icon" /> : <FaQrcode className="pending-icon" />}
+                                     <span>Vault Data</span>
+                                 </div>
+                             ) : (
+                                 Array.from({length: totalVaultQRs}, (_, i) => (
+                                     <div key={i} className={`progress-item ${numOfQRsScanned > i ? 'completed' : 'pending'}`}>
+                                         {numOfQRsScanned > i ? <FaCheck className="check-icon" /> : <FaQrcode className="pending-icon" />}
+                                         <span>Vault QR {i + 1}</span>
+                                     </div>
+                                 ))
+                             )}
                          </div>
-                         
-                         {/* Keys Grid - Simplified */}
+
+                         {/* Keys Grid */}
                          <div className="keys-section">
                              <div className="keys-header">
                                  <FaKey className="section-icon" />
                                  <span>Keys ({numOfQRKEYSsScanned}/{metadata.threshold})</span>
                              </div>
-                             
+
                              <div className="keys-grid-simple">
                                  {metadata.keys && metadata.keys.map((keyAlias, index) => {
                                      const isScanned = scannedKeys.includes(keyAlias);
                                      return (
-                                         <div 
-                                             key={index} 
+                                         <div
+                                             key={index}
                                              className={`key-item-simple ${isScanned ? 'completed' : ''}`}
                                          >
-                                             {isScanned ? (
-                                                 <FaCheck className="check-icon" />
-                                             ) : (
-                                                 <FaKey className="key-icon" />
-                                             )}
+                                             {isScanned ? <FaCheck className="check-icon" /> : <FaKey className="key-icon" />}
                                              <span className="key-alias">{keyAlias}</span>
                                          </div>
                                      );
                                  })}
                              </div>
-                             
+
                              <div className="keys-note-simple">
                                  Scan any {metadata.threshold} of {metadata.keys.length} keys
                                  {numOfQRKEYSsScanned > 0 && (

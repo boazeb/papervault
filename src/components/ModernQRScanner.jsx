@@ -257,36 +257,35 @@ const ModernQRScanner = ({
     const buildScannerConstraints = () => {
         let videoConstraints = {};
         
-        // Ultra-conservative constraint strategy
+        const hdConstraints = {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            focusMode: { ideal: 'continuous' }
+        };
+
         if (currentDevice && availableDevices.length > 1) {
-            // Multiple cameras: use deviceId to select specific camera
             videoConstraints = {
-                deviceId: { ideal: currentDevice }
+                deviceId: { ideal: currentDevice },
+                ...hdConstraints
             };
         } else if (availableDevices.length === 1) {
-            // Single camera: use absolute minimal constraints - let browser handle everything
-            videoConstraints = {}; // No constraints at all - just let browser use the only camera
+            videoConstraints = { ...hdConstraints };
         } else if (availableDevices.length > 1) {
-            // Multiple cameras but no specific selection: minimal constraints with smart facingMode
             if (retryCount === 0) {
-                const hasBackCamera = availableDevices.some(device => 
-                    device.label.toLowerCase().includes('back') || 
+                const hasBackCamera = availableDevices.some(device =>
+                    device.label.toLowerCase().includes('back') ||
                     device.label.toLowerCase().includes('environment') ||
                     device.label.toLowerCase().includes('rear')
                 );
-                
-                if (hasBackCamera) {
-                    videoConstraints = { facingMode: { ideal: 'environment' } };
-                } else {
-                    videoConstraints = { facingMode: { ideal: 'user' } };
-                }
+                videoConstraints = {
+                    facingMode: { ideal: hasBackCamera ? 'environment' : 'user' },
+                    ...hdConstraints
+                };
             } else {
-                // Retry with no constraints
-                videoConstraints = {};
+                videoConstraints = { ...hdConstraints };
             }
         } else {
-            // No cameras detected yet: minimal fallback
-            videoConstraints = {};
+            videoConstraints = { ...hdConstraints };
         }
         
         return {
@@ -358,6 +357,7 @@ const ModernQRScanner = ({
                     onError={handleError}
                     constraints={scannerConstraints}
                     paused={isProcessing || !isMounted}
+                    formats={['qr_code']}
                     allowMultiple={false}
                     scanDelay={300}
                     styles={{

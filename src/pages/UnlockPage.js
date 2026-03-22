@@ -13,11 +13,8 @@ import PreparationStep from '../components/PreparationStep';
 import UnlockedVault from '../components/UnlockedVault';
 import { useCameraManager } from '../hooks/useCameraManager';
 
-// NEW: Import format-specific components
 import SingleQRUnlock from '../components/SingleQRUnlock';
 import LegacyMultiQRUnlock from '../components/LegacyMultiQRUnlock';
-
-// Moved camera logic to useCameraManager hook
 
 function UnlockPage() {
     const navigate = useNavigate();
@@ -35,7 +32,6 @@ function UnlockPage() {
     const [scannedKeys, setScannedKeys] = useState([]);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     
-    // Camera management via custom hook
     const cameraManager = useCameraManager();
 
     useEffect(() => {
@@ -55,11 +51,9 @@ function UnlockPage() {
     useEffect(()=>{
         if (!metadata) return;
         
-        // NEW: Handle both single QR and legacy multi-QR formats
         const totalVaultQRs = metadata.data ? 1 : metadata.qrcodes;
         
         if (numOfQRsScanned >= totalVaultQRs) {
-            // Scanned vault QRs - transitioning to key scanning
             setScanType('key');
         }
     }, [numOfQRsScanned, metadata]);
@@ -72,9 +66,7 @@ function UnlockPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps -- unlockVault and metadata intentionally excluded to avoid loops
     }, [numOfQRKEYSsScanned]);
 
-    // Auto-scroll to top when wizard step changes
     useEffect(() => {
-        // Only scroll if user has scrolled down (more than 100px from top)
         if (window.scrollY > 100) {
             window.scrollTo({
                 top: 0,
@@ -105,7 +97,6 @@ function UnlockPage() {
             return;
         }
 
-        // NEW: Prevent duplicate vault scanning
         if (metadata && jsonObject.id === 1) {
             alert('Vault already scanned. Please scan key QR codes instead.');
             setTimeout(() => setIsProcessing(false), 300);
@@ -113,29 +104,19 @@ function UnlockPage() {
         }
 
         if (jsonObject.id===1) {
-            // Version validation
             if (!jsonObject.version) {
-                // Assume version 1 for backward compatibility
                 jsonObject.version = '1';
             } else if (!VAULT_VERSIONS[jsonObject.version]) {
                 alert('This vault was created with a newer version of PaperVault.xyz. Please update your software.');
-               // setIsProcessing(false);
-               // return;
             }
             
             setMetadata(jsonObject);
             
-            // NEW: Check if this is a single QR code format (has data field)
             if (jsonObject.data) {
-                            // Detected new single QR format - setting cipher data immediately
                 setCipherData(jsonObject.data);
-                // For single QR format, we've scanned all vault data
                 setNumOfQRsScanned(1);
-                // Skip to key scanning phase
                 setScanType('key');
             } else {
-                            // Detected legacy multi-QR format - expecting data shards
-                // Legacy format - expect separate data shards
                 setNumOfQRsScanned(1);
             }
         } else {
@@ -153,7 +134,6 @@ function UnlockPage() {
     };
 
     const scannedKey= (data) => {
-        // NEW: Validate key data structure
         if (!data || !data.key || !data.ident) {
             alert('Invalid key QR code. Please scan a valid key.');
             setTimeout(() => setIsProcessing(false), 300);
@@ -174,15 +154,11 @@ function UnlockPage() {
             return;
         }
 
-        // Fix: Use spread operator to create new arrays instead of mutating existing ones
         const newUnlockShares = [...unlockShares, data.key];
         setUnlockShares(newUnlockShares);
 
         const newScannedKeys = [...scannedKeys, data.ident];
         setScannedKeys(newScannedKeys);
-        
-        // Key scanned successfully
-        
         setNumOfQRKEYSsScanned(numOfQRKEYSsScanned+1);
         setTimeout(() => setIsProcessing(false), 300);
     }
@@ -195,8 +171,6 @@ function UnlockPage() {
                 error.name === 'NotFoundError' || 
                 error.name === 'NotReadableError' || 
                 error.name === 'OverconstrainedError') {
-                
-                // Camera error detected
                 
                 if (error.name === 'NotAllowedError') {
                     cameraManager.setCameraError('Camera permission denied. Please allow camera access and refresh the page.');
@@ -237,10 +211,7 @@ function UnlockPage() {
         }
     };
 
-    // switchCamera function moved to useCameraManager hook
-
     const unlockVault = ()=> {
-        // NEW: Comprehensive validation before attempting decryption
         if (!metadata) {
             alert('Missing vault metadata. Please scan vault QR first.');
             return;
@@ -267,7 +238,6 @@ function UnlockPage() {
             return;
         }
 
-        // All validations passed - proceed with decryption
         const getCipherKey = () => {
             if (metadata.threshold === 1) {
                 if (!unlockShares[0]) {
@@ -355,18 +325,12 @@ function UnlockPage() {
         setNumOfQRKEYSsScanned(0);
     };
 
-    // NEW: Vault format detection and manual override
-    const [forceFormat, setForceFormat] = useState(null); // 'single' or 'legacy'
+    const [forceFormat, setForceFormat] = useState(null);
     
     const getVaultFormat = () => {
-        // If user manually selected a format, use that
         if (forceFormat) return forceFormat;
-        
-        // If no metadata yet, default to single QR format (v2)
         if (!metadata) return 'single';
-        
-        // Once metadata is scanned, detect format automatically
-        return metadata.data ? 'single' : 'legacy';
+        return metadata.version === '1' ? 'legacy' : 'single';
     };
 
     const isUsingUnifiedComponent = () => {

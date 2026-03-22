@@ -25,7 +25,6 @@ const PreparationStep = ({ isOnline, onContinue }) => {
             return; // Can't uncheck offline when actually offline
         }
         
-        // Allow checking offline if user chose to proceed online
         if (item === 'offline' && isOnline && !proceedOnline) {
             return;
         }

@@ -13,6 +13,9 @@
 
 /* Simplified Progress Item Row */
 .single-qr-mode .progress-item-row {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
     margin-bottom: 24px;
 }
 

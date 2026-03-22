@@ -79,48 +79,33 @@ function validateHexInput(value, label, exactBytes, maxHexLength) {
 }
 
 export class EncryptionService {
-    static hash =  (dataToHash) => {
-        return CryptoJS.SHA256(dataToHash).toString();
-    };
-
-    /**
-     * V2 encryption: Web Crypto AES-256-GCM, random key (no PBKDF2).
-     * Returns cipherText (hex), cipherKey (hex), cipherIV (nonce hex), version '2'.
-     */
-    static encryptV2 = async (dataToEncrypt) => {
-        if (typeof dataToEncrypt !== 'string') {
-            throw new Error('Secret data must be a string.');
-        }
-        const keyBytes = secureRandomBytes(32);
-        const nonce = secureRandomBytes(GCM_NONCE_BYTES);
-        const key = await crypto.subtle.importKey(
-            'raw',
-            keyBytes,
-            { name: 'AES-GCM', length: 256 },
-            false,
-            ['encrypt']
-        );
-        const encoded = new TextEncoder().encode(dataToEncrypt);
-        const ciphertextWithTag = await crypto.subtle.encrypt(
-            { name: 'AES-GCM', iv: nonce, tagLength: 128 },
-            key,
-            encoded
-        );
-        return {
-            cipherText: uint8ArrayToHex(new Uint8Array(ciphertextWithTag)),
-            cipherKey: uint8ArrayToHex(keyBytes),
-            cipherIV: uint8ArrayToHex(nonce),
-            cipherOpenSSL: null,
-            version: '2'
-        };
-    };
-
     static encrypt = async (dataToEncrypt, password) => {
         if (typeof dataToEncrypt !== 'string') {
             throw new Error('Secret data must be a string.');
         }
         if (!password) {
-            return EncryptionService.encryptV2(dataToEncrypt);
+            const keyBytes = secureRandomBytes(32);
+            const nonce = secureRandomBytes(GCM_NONCE_BYTES);
+            const key = await crypto.subtle.importKey(
+                'raw',
+                keyBytes,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt']
+            );
+            const encoded = new TextEncoder().encode(dataToEncrypt);
+            const ciphertextWithTag = await crypto.subtle.encrypt(
+                { name: 'AES-GCM', iv: nonce, tagLength: 128 },
+                key,
+                encoded
+            );
+            return {
+                cipherText: uint8ArrayToHex(new Uint8Array(ciphertextWithTag)),
+                cipherKey: uint8ArrayToHex(keyBytes),
+                cipherIV: uint8ArrayToHex(nonce),
+                cipherOpenSSL: null,
+                version: '2'
+            };
         }
 
         let salt        = uint8ArrayToWordArray(secureRandomBytes(16));

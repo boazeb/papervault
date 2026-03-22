@@ -75,8 +75,8 @@ const UnlockedVault = ({ decryptionResult, onClose }) => {
                 <div className="warning-content">
                     <h5>⚠️ Security Notice</h5>
                     <p>
-                        Your vault content is now decrypted in memory. For best security,
-                        close this tab or browser when finished so sensitive data is cleared from memory.
+                        When finished, close this browser tab to clear sensitive data from memory.
+                        For maximum security, close the entire browser.
                     </p>
                 </div>
             </div>

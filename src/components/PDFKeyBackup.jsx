@@ -10,35 +10,10 @@ const PDFKeyBackup = (props) => {
         return moment.tz(new Date(timestamp*1000), 'YYYY-MM-DD', moment.tz.guess()).format('YYYY-MM-DD HH:mm:ss')
     };
 
-    // Define a fallback set of colors to use if props.vaultColors is empty
-    const defaultColors = ['#FF0000', '#0000FF', '#008000']; // Red, Blue, Green
-    // Use the colors that are available, or use defaults
-    const effectiveColors = (props.vaultColors && props.vaultColors.length > 0) 
+    const defaultColors = ['#FF0000', '#0000FF', '#008000'];
+    const effectiveColors = (props.vaultColors && props.vaultColors.length > 0)
         ? props.vaultColors 
         : defaultColors;
-
-    // Convert color hex to name representation (reserved for future use)
-    // eslint-disable-next-line no-unused-vars
-    const _getColorRep = (color) => {
-        // Extract the color name or generate a simple text representation
-        if (color.startsWith('#')) {
-            // Convert hex to simple name if possible
-            if (color === '#FF0000') return 'RED';
-            if (color === '#0000FF') return 'BLUE';
-            if (color === '#008000') return 'GREEN';
-            if (color === '#FFA500') return 'ORANGE';
-            if (color === '#800080') return 'PURPLE';
-            if (color === '#A52A2A') return 'BROWN';
-            if (color === '#000000') return 'BLACK';
-            if (color === '#FF00FF') return 'MAGENTA';
-            if (color === '#00FFFF') return 'CYAN';
-            if (color === '#FFD700') return 'GOLD';
-            
-            // If not a standard color, use first 3 chars of hex
-            return color.substring(1, 4);
-        }
-        return 'COLOR';
-    };
 
     const styles = StyleSheet.create({
         printPage: {
@@ -205,7 +180,6 @@ const PDFKeyBackup = (props) => {
         },
     });
 
-    // Render color boxes with similar style to PDFVaultBackup
     const renderColorBoxes = () => {
         return (
             <div style={{
@@ -215,7 +189,6 @@ const PDFKeyBackup = (props) => {
                 marginTop: '0px',
                 alignItems: 'flex-end'
             }}>
-                {/* Also keep the visual representation for browser/print */}
                 <div style={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -256,87 +229,6 @@ const PDFKeyBackup = (props) => {
         margin: 2
     });
     const qr = canvas.toDataURL();
-
-    // New ASCII-style header for key backup (reserved for future use)
-    // eslint-disable-next-line no-unused-vars
-    const _renderKeyHeaderAscii = () => {
-        // Get formatted creation date
-        const creationDate = formatTime(props.createdTimestamp);
-
-        return (
-            <div style={styles.asciiBoxStyle}>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                }}>
-                    <div style={{
-                        flexGrow: 1,
-                        flexShrink: 1,
-                        minWidth: 0,
-                        maxWidth: '65%',  
-                    }}>
-                        <div style={{fontSize: 18, fontWeight: 'bold', marginBottom: 10, marginTop: 10, fontFamily: 'Helvetica-BoldOblique'}}>
-                            PAPERVAULT.XYZ SECURE KEY BACKUP
-                        </div>
-                        <div>
-                            {` ██╗  ██╗███████╗██╗   ██╗
- ██║ ██╔╝██╔════╝╚██╗ ██╔╝
- █████╔╝ █████╗   ╚████╔╝ 
- ██╔═██╗ ██╔══╝    ╚██╔╝  
- ██║  ██╗███████╗   ██║   
- ╚═╝  ╚═╝╚══════╝   ╚═╝   `}
-                        </div>
-                    </div>
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-end',
-                        justifyContent: 'flex-start',
-                        minWidth: '240px',
-                    }}>
-                        {/* Use the new function to render color blocks */}
-                        {renderColorBoxes()}
-                        
-                        <div style={{
-                            marginTop: 10,
-                            fontFamily: 'monospace',
-                            color: '#dc3545',
-                            fontWeight: 'bold',
-                            border: '1px solid #dc3545',
-                            borderRadius: '0px',
-                            padding: '4px 0px',
-                            backgroundColor: '#fff3f3',
-                        }}>
-                            {`     !!! IMPORTANT !!!       `}
-                        </div>
-                        <div style={{marginTop: 8, fontWeight: 'bold'}}>{`Page 1 of 1`}</div>
-                        <div style={{marginTop: 8}}>Created: {creationDate}</div>
-                        <div style={{marginTop: 4, display: 'flex', alignItems: 'center', gap: '8px'}}>
-                            <span style={{
-                                backgroundColor: '#0d6efd',
-                                color: 'white',
-                                padding: '2px 8px',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                fontWeight: 'bold'
-                            }}>
-                                VAULT KEY
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style={styles.asciiDetailsSection}>
-                    {`-----------------------------------------------------------------------------
-Vault Name:         ${props.vaultName}
-Key Alias:          `}
-                    <span style={styles.keyAliasStyle}>{props.keyAlias}</span>
-                    
-                </div>
-            </div>
-        )
-    };
 
     return (
         <div style={{

@@ -61,7 +61,6 @@ function CreateVault(props) {
     const [vaultColors, setVaultColors] = useState([]);
 
 
-    // Set application limits
     useEffect(() => {
         const currentLimits = getCurrentLimits();
         setMaxChars(currentLimits.maxStorage);
@@ -127,7 +126,7 @@ function CreateVault(props) {
             if (copyColors.length === 0) break;
             const randomIndex = Math.floor(Math.random() * copyColors.length);
             selectedColors.push(copyColors[randomIndex]);
-            copyColors.splice(randomIndex, 1); // Remove selected color
+            copyColors.splice(randomIndex, 1);
         }
         
         return selectedColors;
@@ -210,7 +209,6 @@ function CreateVault(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount to restore cookies
     }, []);
 
-    // Validate key limits
     const exceedsKeyLimit = () => {
         return totalShareholders > getCurrentLimits().maxShares;
     };
@@ -227,7 +225,6 @@ function CreateVault(props) {
             return;
         }
 
-        // Check if user exceeds key limits
         if (exceedsKeyLimit()) {
             const maxKeys = getCurrentLimits().maxShares;
             alert(`Maximum ${maxKeys} keys supported due to cryptographic library constraints. Please reduce the number of keys.`);
@@ -245,18 +242,15 @@ function CreateVault(props) {
         setWizardStep(2); // Go to security check first
     };
 
-    // Add new function for security step
     const continueFromSecurity = () => {
         setWizardStep(3); // Go to secret data entry
     };
 
-    // Add new function for continuing from secret data entry to preview
     const continueFromSecretData = (compressedText) => {
         setCompressedSecretValue(compressedText || secretValue); // Use compressed version for storage
         setWizardStep(4); // Go to preview step (new)
     };
 
-    // Add new function for continuing from preview to encryption
     const continueFromPreview = () => {
         setWizardStep(5); // Go to encryption step (shifted from 4 to 5)
     };
@@ -502,9 +496,6 @@ function CreateVault(props) {
                             </Card.Header>
                             <Card.Body>
                                 <pre className="preview-content">{compressedSecretValue}</pre>
-                                {/* <div className="mt-2 text-muted small">
-                                    <strong>Space saved:</strong> {secretValue.length - compressedSecretValue.length} characters removed from empty fields
-                                </div> */}
                             </Card.Body>
                         </Card>
 

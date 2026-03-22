@@ -1426,7 +1426,7 @@ body {
         font-size: 2rem;
     }
     
-    .accordion-header {
+    .faq-section .accordion-header {
         padding: 1.5rem;
         flex-direction: column;
         align-items: flex-start;

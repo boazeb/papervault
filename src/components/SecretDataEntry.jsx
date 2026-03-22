@@ -20,7 +20,6 @@ function SecretDataEntry({
 }) {
 
     
-    // Structured data state (now includes freeText)
     const [structuredData, setStructuredData] = useState({
         passwords: [],
         wallets: [],
@@ -30,10 +29,8 @@ function SecretDataEntry({
         custom: []
     });
 
-    // Show/hide states for sensitive fields
     const [visibleFields, setVisibleFields] = useState({});
     
-    // Accordion states for each section
     const [expandedEntries, setExpandedEntries] = useState({
         passwords: {},
         wallets: {},
@@ -42,7 +39,6 @@ function SecretDataEntry({
         custom: {}
     });
 
-    // New state for tracking entry modes (edit/view/new)
     const [entryModes, setEntryModes] = useState({
         passwords: {},
         wallets: {},
@@ -51,7 +47,6 @@ function SecretDataEntry({
         custom: {}
     });
 
-    // Track if we're currently adding a new entry to each section
     const [, setAddingNewEntry] = useState({
         passwords: false,
         wallets: false,
@@ -60,11 +55,9 @@ function SecretDataEntry({
         custom: false
     });
 
-    // Create unified item list for chronological display
     const getAllItems = () => {
         const allItems = [];
-        
-        // Add items from each section with type information
+
         Object.keys(structuredData).forEach(section => {
             if (section !== 'freeText' && structuredData[section]) {
                 structuredData[section].forEach((item, index) => {
@@ -72,7 +65,6 @@ function SecretDataEntry({
                         type: section,
                         index: index,
                         data: item,
-                        // Add a unique key for React rendering
                         id: `${section}-${index}`
                     });
                 });
@@ -84,7 +76,6 @@ function SecretDataEntry({
 
 
 
-    // Parse JSON back to structured data (now using array format)
     const parseTextToStructured = (text) => {
         if (!text.trim()) {
             return {

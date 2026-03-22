@@ -11,10 +11,34 @@ const PDFVaultBackup = (props) => {
     }
 
     const tmpQRArray = [];
-    let canvas;
+    const SPLIT_THRESHOLD_BYTES = 420;
 
-        // Create combined vault data in single QR code
-        let combinedVaultData = JSON.stringify({
+    const combinedPayload = JSON.stringify({
+        id: 1,
+        vault: 'papervault.xyz',
+        version: CURRENT_VAULT_VERSION,
+        name: props.vaultName,
+        shares: props.shares.length,
+        threshold: props.threshold,
+        cipherIV: props.cipherIV,
+        keys: props.keyAliasArray,
+        data: props.cipherText
+    });
+
+    const payloadBytes = new TextEncoder().encode(combinedPayload).length;
+    let totalQRs;
+
+    if (payloadBytes <= SPLIT_THRESHOLD_BYTES) {
+        // Single QR — payload is small enough
+        const canvas = document.createElement('canvas');
+        QRCode2.toCanvas(canvas, combinedPayload, {
+            errorCorrectionLevel: 'M', width: 250, margin: 2
+        }).catch(() => {});
+        tmpQRArray.push({ qrCode: canvas.toDataURL(), id: 1, raw: combinedPayload });
+        totalQRs = 1;
+    } else {
+        // Split into metadata QR + data QR
+        const metadataPayload = JSON.stringify({
             id: 1,
             vault: 'papervault.xyz',
             version: CURRENT_VAULT_VERSION,
@@ -23,37 +47,35 @@ const PDFVaultBackup = (props) => {
             threshold: props.threshold,
             cipherIV: props.cipherIV,
             keys: props.keyAliasArray,
-            data: props.cipherText // Include the encrypted data directly
+            qrcodes: 2
+        });
+        const dataPayload = JSON.stringify({
+            id: 2,
+            data: props.cipherText
         });
 
-        canvas = document.createElement('canvas');
-        const toCanvasPromise = QRCode2.toCanvas(canvas, combinedVaultData, {
-            errorCorrectionLevel: 'M',
-            width: 250,  // Reduced from 320 to 250
-            margin: 2
-        });
-        toCanvasPromise.catch(() => {});
-        tmpQRArray.push({qrCode:canvas.toDataURL(), id: 1, raw: combinedVaultData});
+        const canvas1 = document.createElement('canvas');
+        QRCode2.toCanvas(canvas1, metadataPayload, {
+            errorCorrectionLevel: 'M', width: 250, margin: 2
+        }).catch(() => {});
+        tmpQRArray.push({ qrCode: canvas1.toDataURL(), id: 1, raw: metadataPayload });
 
-        // No longer need to chunk data since everything is in one QR code
-        const chunkedArray = [tmpQRArray]; // Single QR code in array format
+        const canvas2 = document.createElement('canvas');
+        QRCode2.toCanvas(canvas2, dataPayload, {
+            errorCorrectionLevel: 'M', width: 250, margin: 2
+        }).catch(() => {});
+        tmpQRArray.push({ qrCode: canvas2.toDataURL(), id: 2, raw: dataPayload });
+        totalQRs = 2;
+    }
 
-        const qrArray = chunkedArray;
-
-    const totalQRs = 1; // Always 1 QR code now
-
-    //const [qrArray, setQRArray] = useState(chunkedArray);
-    //const [cipherArray, setCipherArray] = useState();
+    const qrArray = [tmpQRArray];
 
     const formatTime = (timestamp) => {
         return moment.tz(new Date(timestamp*1000), 'YYYY-MM-DD', moment.tz.guess()).format('YYYY-MM-DD HH:mm:ss')
     };
 
-    // Add this right after the formatTime function
-    // Define a fallback set of colors to use if props.vaultColors is empty
-    const defaultColors = ['#FF0000', '#0000FF', '#008000']; // Red, Blue, Green
-    // Log and use the colors that are available, or use defaults
-    const effectiveColors = (props.vaultColors && props.vaultColors.length > 0) 
+    const defaultColors = ['#FF0000', '#0000FF', '#008000'];
+    const effectiveColors = (props.vaultColors && props.vaultColors.length > 0)
         ? props.vaultColors 
         : defaultColors;
 
@@ -479,30 +501,6 @@ const PDFVaultBackup = (props) => {
         )
     };
 
-    // Text-based representation of colors (used in commented-out COLORS label)
-    // eslint-disable-next-line no-unused-vars
-    const getColorRep = (color) => {
-        // Extract the color name or generate a simple text representation
-        if (color.startsWith('#')) {
-            // Convert hex to simple name if possible
-            if (color === '#FF0000') return 'RED';
-            if (color === '#0000FF') return 'BLUE';
-            if (color === '#008000') return 'GREEN';
-            if (color === '#FFA500') return 'ORANGE';
-            if (color === '#800080') return 'PURPLE';
-            if (color === '#A52A2A') return 'BROWN';
-            if (color === '#000000') return 'BLACK';
-            if (color === '#FF00FF') return 'MAGENTA';
-            if (color === '#00FFFF') return 'CYAN';
-            if (color === '#FFD700') return 'GOLD';
-            
-            // If not a standard color, use first 3 chars of hex
-            return color.substring(1, 4);
-        }
-        return 'COLOR';
-    };
-
-    // Then update the renderColorBoxes function to use effectiveColors instead
     const renderColorBoxes = () => {
         return (
             <div style={{
@@ -512,12 +510,6 @@ const PDFVaultBackup = (props) => {
                 marginTop: '0px',
                 alignItems: 'flex-end'
             }}>
-                {/* Add a text label for colors that will definitely show up in PDF
-                <div style={{fontSize: 12, fontFamily: 'monospace', fontWeight: 'bold'}}>
-                    COLORS: {effectiveColors.map(color => getColorRep(color)).join(' | ')}
-                </div> */}
-                
-                {/* Also keep the visual representation for browser/print */}
                 <div style={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -567,7 +559,35 @@ const PDFVaultBackup = (props) => {
                             ? { flex: '0 0 320px', display: 'flex', flexDirection: 'column', alignItems: 'center' }
                             : { float: 'left', width: '320px', marginRight: '40px', textAlign: 'center' }),
                     }}>
-                        {renderQR(qrArray[0][0], 0, 0)}
+                        {totalQRs > 1 && (
+                        <div style={{
+                            fontSize: 11,
+                            fontWeight: 'bold',
+                            color: '#495057',
+                            textAlign: 'center',
+                            fontFamily: 'Helvetica-Bold',
+                            marginBottom: '4px'
+                        }}>
+                            VAULT QR 1 of {totalQRs}
+                        </div>
+                    )}
+                    {renderQR(qrArray[0][0], 0, 0)}
+                        {totalQRs > 1 && qrArray[0][1] && (
+                            <>
+                                <div style={{
+                                    fontSize: 11,
+                                    fontWeight: 'bold',
+                                    color: '#495057',
+                                    textAlign: 'center',
+                                    fontFamily: 'Helvetica-Bold',
+                                    marginTop: '15px',
+                                    marginBottom: '4px'
+                                }}>
+                                    VAULT QR 2 of {totalQRs}
+                                </div>
+                                {renderQR(qrArray[0][1], 0, 1)}
+                            </>
+                        )}
                         <div style={{
                             fontSize: 14,
                             fontWeight: 'bold',
@@ -650,7 +670,7 @@ const PDFVaultBackup = (props) => {
                             }}>
                                 <li>Go to <strong>papervault.xyz/unlock</strong></li>
                                 <li>Go offline</li>
-                                <li>Scan your vault QR code (this page)</li>
+                                <li>Scan your vault QR code{totalQRs > 1 ? 's' : ''} (this page)</li>
                                 <li>Scan {props.threshold} key{props.threshold > 1 ? 's' : ''}</li>
                             </ol>
 
