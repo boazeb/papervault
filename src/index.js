@@ -4,7 +4,16 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from "react-router-dom"
+import { setZXingModuleOverrides } from 'barcode-detector/pure';
 
+setZXingModuleOverrides({
+    locateFile: (path, prefix) => {
+        if (path.endsWith('.wasm')) {
+            return `/wasm/${path}`;
+        }
+        return prefix + path;
+    }
+});
 
 ReactDOM.render(
   <React.StrictMode>
