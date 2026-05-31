@@ -127,14 +127,18 @@ export async function createKit(opts) {
         throw new Error('createKit: no secrets to back up.');
     }
     if (userChars > LIMITS.MAX_STORAGE) {
-        // Surface the top contributors so the user knows what to drop.
-        const top = summarizeCharsPerEntry(secrets).slice(0, 3);
-        const topStr = top.map(t => `"${t.name}" (${t.chars})`).join(', ');
+        // Surface entry SIZES (not names): error messages can flow into
+        // audit logs and MCP responses, where plaintext names would
+        // undercut our "names hashed by default" promise. Sizes alone
+        // let the user identify the heaviest entries when they inspect
+        // their own source.
+        const sizes = summarizeCharsPerEntry(secrets).slice(0, 5).map(t => t.chars);
+        const sizesStr = sizes.length > 0 ? `Largest entries by chars: ${sizes.join(', ')}. ` : '';
         throw new Error(
-            `createKit: ${userChars}/${LIMITS.MAX_STORAGE} chars used. ` +
-            (top.length > 0 ? `Largest entries: ${topStr}. ` : '') +
+            `createKit: ${userChars}/${LIMITS.MAX_STORAGE} chars used by ${secrets.length} entries. ` +
+            sizesStr +
             `Matches papervault.xyz so QR codes stay scannable on paper. ` +
-            `Drop one or more entries, shorten them, or split across multiple vaults.`
+            `Drop or shorten entries, or split across multiple vaults.`
         );
     }
 

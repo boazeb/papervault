@@ -2,7 +2,7 @@
 // Default location: ~/.papervault/audit.log
 // Format: one JSON object per line (jsonl) — easy to grep + parse.
 
-import { appendFile, mkdir } from 'node:fs/promises';
+import { appendFile, mkdir, chmod } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -25,8 +25,15 @@ function auditPath() {
  */
 export async function audit(entry) {
     const path = auditPath();
+    const dir = dirname(path);
+    // Owner-only on dir + file. The audit log itself never contains secret
+    // values, but it does contain action types, source URIs, timestamps,
+    // and (with PAPERVAULT_LOG_NAMES=1) plaintext secret names. On
+    // shared systems, world-readable would leak metadata.
     try {
-        await mkdir(dirname(path), { recursive: true });
+        await mkdir(dir, { recursive: true, mode: 0o700 });
+        // mkdir doesn't change perms on an existing dir; ensure it anyway.
+        try { await chmod(dir, 0o700); } catch {}
     } catch { /* dir might exist; OK */ }
 
     const logNamesPlaintext = process.env.PAPERVAULT_LOG_NAMES === '1';
@@ -45,6 +52,9 @@ export async function audit(entry) {
     safe.ts = new Date().toISOString();
     try {
         await appendFile(path, JSON.stringify(safe) + '\n', 'utf8');
+        // appendFile creates with mode based on umask if file didn't exist;
+        // chmod after to guarantee 0o600 regardless.
+        try { await chmod(path, 0o600); } catch {}
     } catch (err) {
         // Audit log failures should never crash the main flow.
         process.stderr.write(`audit log warning: ${err.message}\n`);

@@ -5,7 +5,7 @@
 // Keeps the in-memory-only posture consistent: secrets only touch disk if
 // the caller explicitly opts in via savePath.
 
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, chmod } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { createKit } from '@papervault/core';
 
@@ -41,17 +41,25 @@ export async function runKitFlow(opts) {
 
     // Optional disk save (opt-in). Saved files have the auto-print script
     // stripped — they're for archival, not for the immediate dialog.
+    // Restrict perms to owner-only — these HTML pages contain QR codes that,
+    // with the threshold-of-N key shares, decrypt to your secrets.
+    // World-readable would let other local users scan and unlock.
     let savedTo = null;
     if (savePath) {
         savedTo = resolve(savePath, `vault-${kit.vaultId}`);
-        await mkdir(savedTo, { recursive: true });
+        await mkdir(savedTo, { recursive: true, mode: 0o700 });
+        try { await chmod(savedTo, 0o700); } catch { /* ok on filesystems that don't support it */ }
         for (const page of kit.pages) {
             const html = page.html.replace(
                 /<script>window\.addEventListener\('load',.*?<\/script>/g, ''
             );
-            await writeFile(join(savedTo, `${page.filename}.html`), html, 'utf8');
+            const filePath = join(savedTo, `${page.filename}.html`);
+            await writeFile(filePath, html, { encoding: 'utf8', mode: 0o600 });
+            // writeFile only applies `mode` when CREATING the file; chmod
+            // after to enforce regardless of pre-existing perms or umask.
+            try { await chmod(filePath, 0o600); } catch {}
         }
-        process.stderr.write(`\nSaved ${kit.pages.length} files to ${savedTo}\n`);
+        process.stderr.write(`\nSaved ${kit.pages.length} files to ${savedTo} (mode 0600)\n`);
     }
 
     if (!print) {

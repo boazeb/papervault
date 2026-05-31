@@ -46,6 +46,24 @@ export function servePrintKit(kit) {
             res.writeHead(403); res.end(); return;
         }
 
+        // DNS rebinding defense: an attacker page can rebind its own hostname
+        // to 127.0.0.1 in the victim's resolver, then bypass same-origin to
+        // read our responses. The Host header is set by the browser to
+        // whatever URL the page used, so a rebinding attack arrives with a
+        // non-localhost Host. Reject anything that isn't an explicit
+        // loopback address (with optional port).
+        const addr = server.address();
+        const expectedPort = addr ? addr.port : null;
+        const host = (req.headers.host ?? '').toLowerCase();
+        const allowedHosts = new Set(expectedPort != null ? [
+            `127.0.0.1:${expectedPort}`,
+            `localhost:${expectedPort}`,
+            `[::1]:${expectedPort}`,
+        ] : []);
+        if (!allowedHosts.has(host)) {
+            res.writeHead(403); res.end(); return;
+        }
+
         // CSP: deny everything except inline (we control all the HTML).
         // No external network, no scripts from elsewhere, no images outside data: URIs.
         res.setHeader('Content-Security-Policy',
