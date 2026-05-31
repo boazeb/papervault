@@ -1,6 +1,6 @@
 {
   "name": "@papervault/init",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "One-step setup for PaperVault. `npx @papervault/init` walks you through configuring a vault and writes papervault.config.json.",
   "type": "module",
   "bin": {

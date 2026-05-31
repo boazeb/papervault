@@ -1,6 +1,6 @@
 {
   "name": "@papervault/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Crypto + Shamir Secret Sharing + printable HTML page generation for PaperVault disaster-recovery kits. Produces vaults that unlock at papervault.xyz.",
   "type": "module",
   "main": "./src/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@papervault/mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for PaperVault. Lets AI agents trigger paper-based secret backups as a safety step before sensitive operations — agents never see secret values.",
   "type": "module",
   "bin": {

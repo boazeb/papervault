@@ -1,6 +1,6 @@
 {
   "name": "@papervault/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Command-line PaperVault. Encrypt secrets, split with Shamir Secret Sharing, generate printable disaster-recovery kits from .env files, JSON, Azure Key Vault, and more.",
   "type": "module",
   "bin": {
