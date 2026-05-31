@@ -16,25 +16,18 @@ An agent is about to do something it can't undo. Before it does, it asks PaperVa
 
 ## 🚀 Quick Start
 
+### Claude Code (one command)
+
 ```bash
-npm install -g @papervault/mcp
+claude mcp add -s user papervault -- npx -y @papervault/mcp
+claude mcp list   # confirm it's registered
 ```
 
-Add to your MCP client config. For **Claude Code** (`~/.claude/claude_code_config.json` or project `.claude/`):
+`-s user` makes the server available across all your projects. Drop the flag for current-project-only. Start a new Claude Code conversation to use it.
 
-```json
-{
-  "mcpServers": {
-    "papervault": {
-      "command": "papervault-mcp"
-    }
-  }
-}
-```
+### Other MCP clients (Cursor, Claude Desktop, manual config)
 
-For **Cursor** / **Claude Desktop**: same shape, check your client's docs for the config path.
-
-If you'd rather not install globally:
+The server runs over stdio, so any MCP client works. Add this to the client's MCP config file:
 
 ```json
 {
@@ -46,6 +39,24 @@ If you'd rather not install globally:
   }
 }
 ```
+
+For faster startup on each call (skips the `npx` lookup), install globally and use the binary directly:
+
+```bash
+npm install -g @papervault/mcp
+```
+
+```json
+{
+  "mcpServers": {
+    "papervault": {
+      "command": "papervault-mcp"
+    }
+  }
+}
+```
+
+Restart the client to load the new server.
 
 Requires Node.js ≥ 24.
 

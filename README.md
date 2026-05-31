@@ -51,9 +51,15 @@ The init wizard walks through configuration. The CLI accepts secrets from `.env`
 
 ### 🤖 AI agents (Claude Code, Cursor, other MCP clients)
 
-Add the PaperVault MCP server to your AI client's config file. Agents can then trigger paper backups before risky operations like key rotation or account deletion, without ever seeing the secret values.
+Add the PaperVault MCP server to your AI client. Agents can then trigger paper backups before risky operations like key rotation or account deletion, without ever seeing the secret values.
 
-For Claude Code, add this to `~/.claude/claude_code_config.json` (create it if it doesn't exist):
+For Claude Code, one command:
+
+```bash
+claude mcp add -s user papervault -- npx -y @papervault/mcp
+```
+
+For other clients (Cursor, Claude Desktop, etc.), add this to the client's MCP config file:
 
 ```json
 {
@@ -66,7 +72,7 @@ For Claude Code, add this to `~/.claude/claude_code_config.json` (create it if i
 }
 ```
 
-Restart your AI client to pick up the new server. The same JSON shape works for Cursor, Claude Desktop, and other MCP clients; only the config file location differs. See [`@papervault/mcp`](papervault-mcp/) for client-specific paths and the full tool reference.
+Then restart the client (or start a new Claude Code conversation) to load the server. See [`@papervault/mcp`](papervault-mcp/) for the full tool reference and client-specific config paths.
 
 ### 🐳 Docker
 
