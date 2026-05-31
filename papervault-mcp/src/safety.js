@@ -37,7 +37,10 @@ export function validateSavePath(p) {
 export function validateInteger(value, name, { min, max } = {}) {
     const n = Number(value);
     if (!Number.isInteger(n)) {
-        throw new Error(`${name} must be an integer, got ${typeof value} (${value}).`);
+        // Deliberately do NOT echo `value` itself in the error: if an agent
+        // accidentally passes a secret-shaped string here, the message would
+        // land in the tool response AND the audit log.
+        throw new Error(`${name} must be an integer (got ${typeof value}).`);
     }
     if (min != null && n < min) throw new Error(`${name} must be >= ${min}.`);
     if (max != null && n > max) throw new Error(`${name} must be <= ${max}.`);
