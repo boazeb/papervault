@@ -1,6 +1,7 @@
 
 # dependencies
 /node_modules
+papervault-*/node_modules
 /.pnp
 .pnp.js
 

@@ -1,0 +1,51 @@
+{
+  "name": "@papervault/core",
+  "version": "0.1.0",
+  "description": "Crypto + Shamir Secret Sharing + printable HTML page generation for PaperVault disaster-recovery kits. Produces vaults that unlock at papervault.xyz.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./crypto": "./src/crypto.js",
+    "./templates": "./src/templates/index.js"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=24.x"
+  },
+  "homepage": "https://papervault.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boazeb/papervault.git",
+    "directory": "papervault-core"
+  },
+  "bugs": {
+    "url": "https://github.com/boazeb/papervault/issues"
+  },
+  "keywords": [
+    "papervault",
+    "cryptography",
+    "shamir-secret-sharing",
+    "aes-256-gcm",
+    "secret-sharing",
+    "paper-wallet",
+    "cold-storage",
+    "threshold-encryption",
+    "qr-code",
+    "open-source"
+  ],
+  "author": "PaperVault.xyz",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "bip39": "^3.1.0",
+    "qrcode": "^1.5.3",
+    "shamir-secret-sharing": "^0.0.4"
+  }
+}

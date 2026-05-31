@@ -10,34 +10,74 @@ PaperVault encrypts your secrets and splits the decryption key into shards that 
 
 ## 🚀 Quick Start
 
-Visit [papervault.xyz](https://papervault.xyz) to use PaperVault directly from your browser.
+Pick what fits:
 
-### Self-Hosted Installation (recommended for maximum security)
+| Entry point | Best for |
+|---|---|
+| [Web app](#-web-app) | Zero install, runs in any browser |
+| [Self-hosted web app](#-self-hosted-web-app-recommended-for-maximum-security) | Maximum security, air-gapped |
+| [Command line](#-command-line) | Scripts, `.env` imports, pulling from secret stores |
+| [AI agents (MCP)](#-ai-agents-claude-code-cursor-other-mcp-clients) | Backing up secrets before risky operations |
+| [Docker](#-docker) | Containerized deployment |
+| [Library](#-library) | Embedding PaperVault in your own tool |
+
+Any vault unlocks at [papervault.xyz/unlock](https://papervault.xyz/unlock) or on your self-hosted instance at `/unlock`. The vault format is identical across all entry points.
+
+### 🌐 Web app
+
+Visit [papervault.xyz](https://papervault.xyz). The app is a static React bundle that runs entirely in your browser.
+
+### 🏠 Self-hosted web app (recommended for maximum security)
+
+Run the same web app on your own machine, ideally air-gapped.
 
 ```bash
-# Clone the repository
 git clone https://github.com/boazeb/papervault.git
 cd papervault
-
-# Install dependencies
-npm install
-# or
 yarn install
-
-# Start the app
-npm start
-# or
 yarn start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000).
 
-### Docker
+### 💻 Command line
+
+```bash
+npm install -g @papervault/cli
+papervault init
+```
+
+The init wizard walks through configuration. The CLI accepts secrets from `.env` files, JSON, Azure Key Vault, or interactive entry, and produces the same printable kit.
+
+### 🤖 AI agents (Claude Code, Cursor, other MCP clients)
+
+Add the PaperVault MCP server to your AI client's config file. Agents can then trigger paper backups before risky operations like key rotation or account deletion, without ever seeing the secret values.
+
+For Claude Code, add this to `~/.claude/claude_code_config.json` (create it if it doesn't exist):
+
+```json
+{
+  "mcpServers": {
+    "papervault": {
+      "command": "npx",
+      "args": ["-y", "@papervault/mcp"]
+    }
+  }
+}
+```
+
+Restart your AI client to pick up the new server. The same JSON shape works for Cursor, Claude Desktop, and other MCP clients; only the config file location differs. See [`@papervault/mcp`](papervault-mcp/) for client-specific paths and the full tool reference.
+
+### 🐳 Docker
 
 ```bash
 docker build -t papervault .
 docker run -p 3000:3000 papervault
 ```
+
+### 📦 Library
+
+For embedding PaperVault in another tool, use [`@papervault/core`](papervault-core/). It exposes the crypto, Shamir splitting, and HTML page generation as standalone functions.
 
 ## 🔑 Key Features
 
@@ -147,7 +187,3 @@ This software is provided "as is" without warranty. Users are responsible for:
 - Understanding the cryptographic principles involved
 
 **Always test with non-critical data first!**
-
----
-
-Made in Tel Aviv

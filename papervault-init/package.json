@@ -1,0 +1,45 @@
+{
+  "name": "@papervault/init",
+  "version": "0.1.0",
+  "description": "One-step setup for PaperVault. `npx @papervault/init` walks you through configuring a vault and writes papervault.config.json.",
+  "type": "module",
+  "bin": {
+    "papervault-init": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=24.x"
+  },
+  "homepage": "https://papervault.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boazeb/papervault.git",
+    "directory": "papervault-init"
+  },
+  "bugs": {
+    "url": "https://github.com/boazeb/papervault/issues"
+  },
+  "keywords": [
+    "papervault",
+    "cli",
+    "init",
+    "setup",
+    "wizard",
+    "secret-management",
+    "cryptography",
+    "disaster-recovery",
+    "npx"
+  ],
+  "author": "PaperVault.xyz",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@papervault/cli": "file:../papervault-cli"
+  }
+}

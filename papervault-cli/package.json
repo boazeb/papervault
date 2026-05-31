@@ -1,0 +1,59 @@
+{
+  "name": "@papervault/cli",
+  "version": "0.1.0",
+  "description": "Command-line PaperVault. Encrypt secrets, split with Shamir Secret Sharing, generate printable disaster-recovery kits from .env files, JSON, Azure Key Vault, and more.",
+  "type": "module",
+  "bin": {
+    "papervault": "./src/index.js"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./sources": "./src/sources/index.js",
+    "./audit": "./src/audit.js",
+    "./commands/init.js": "./src/commands/init.js"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=24.x"
+  },
+  "homepage": "https://papervault.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boazeb/papervault.git",
+    "directory": "papervault-cli"
+  },
+  "bugs": {
+    "url": "https://github.com/boazeb/papervault/issues"
+  },
+  "keywords": [
+    "papervault",
+    "cli",
+    "command-line",
+    "cryptography",
+    "shamir-secret-sharing",
+    "aes-256-gcm",
+    "secret-sharing",
+    "paper-wallet",
+    "cold-storage",
+    "disaster-recovery",
+    "key-vault",
+    "azure-key-vault",
+    "secrets-management",
+    "open-source"
+  ],
+  "author": "PaperVault.xyz",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.4.1",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@clack/prompts": "^0.7.0",
+    "@papervault/core": "file:../papervault-core"
+  }
+}
