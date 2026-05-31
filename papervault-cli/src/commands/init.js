@@ -123,6 +123,9 @@ export async function init(argv) {
 
     // ---------- Recurring-source modes: Azure / JSON / stdin ----------
     let sourceUri;
+    // Set by the Azure flow's optional multiselect; gets persisted to the
+    // generated config as `select`. Other source types don't populate it.
+    let initSelect = null;
     if (sourceType === 'file') {
         const pth = cancelIf(await p.text({
             message: 'Path to the JSON file with your secrets:',
@@ -158,12 +161,13 @@ export async function init(argv) {
         if (checkAuth) {
             const s = p.spinner();
             s.start(`Connecting to ${sourceUri}…`);
+            let azureRefs = null;
             try {
                 const src = resolveSource(sourceUri);
                 await src.authenticate();
-                const refs = await src.list();
+                azureRefs = await src.list();
                 await src.close();
-                s.stop(`Connected: ${refs.length} secret${refs.length === 1 ? '' : 's'} visible.`);
+                s.stop(`Connected: ${azureRefs.length} secret${azureRefs.length === 1 ? '' : 's'} visible.`);
             } catch (err) {
                 s.stop('Auth check failed.');
                 p.log.warn(err.message.split('\n')[0]);
@@ -173,10 +177,37 @@ export async function init(argv) {
                 }));
                 if (!skip) { p.cancel('Aborted.'); return; }
             }
+
+            // Multiselect which secrets the saved config should target. Skip
+            // if the listing failed, the KV is empty, or there are only a
+            // few (≤3) where filtering adds no value.
+            if (azureRefs && azureRefs.length > 3) {
+                p.log.info(
+                    `Vaults cap at ${LIMITS.MAX_STORAGE} chars of user content total (so QR codes stay scannable). ` +
+                    `Pick which secrets the backup should include — you can leave it empty to back up everything.`
+                );
+                const lowerBound = azureRefs.reduce((sum, r) => sum + r.name.length, 0);
+                const roughEstimate = lowerBound + azureRefs.length * 60;
+                if (roughEstimate > LIMITS.MAX_STORAGE) {
+                    p.log.warn(
+                        `Heads up: rough estimate is ${lowerBound}–${roughEstimate} chars across all ${azureRefs.length} secrets, ` +
+                        `likely above the ${LIMITS.MAX_STORAGE} limit. Pick a subset below.`
+                    );
+                }
+                const picked = cancelIf(await p.multiselect({
+                    message: `Secrets to back up (none = all ${azureRefs.length}):`,
+                    options: azureRefs.map(r => ({ value: r.name, label: r.name })),
+                    required: false,
+                }));
+                if (picked.length > 0 && picked.length < azureRefs.length) {
+                    initSelect = picked.join(',');
+                    p.log.success(`Selected ${picked.length} of ${azureRefs.length}; saving as 'select' in the config.`);
+                }
+            }
         }
     }
 
-    const cfg = await collectVaultConfig({ prefill, sourceUri });
+    const cfg = await collectVaultConfig({ prefill, sourceUri, initSelect });
     p.note(formatConfigPreview(cfg), 'Config preview');
 
     const confirm = cancelIf(await p.confirm({
@@ -380,7 +411,7 @@ export function parseEnvFile(content) {
 // Shared: vault config (shares, threshold, name, custodians, save path)
 // =====================================================================
 
-async function collectVaultConfig({ prefill, sourceUri }) {
+async function collectVaultConfig({ prefill, sourceUri, initSelect = null }) {
     const shares = Number(cancelIf(await p.text({
         message: 'How many key shares should the vault be split into?',
         placeholder: '3',
@@ -453,11 +484,17 @@ async function collectVaultConfig({ prefill, sourceUri }) {
         })).trim());
     }
 
+    // Precedence: explicit user selection (from init's multiselect step) wins
+    // over whatever was in the prefilled config. None of the prompts above ask
+    // for `select`, so the only sources are initSelect or prefill.
+    const effectiveSelect = initSelect ?? prefill?.select ?? null;
+
     return {
         source: sourceUri,
         threshold, shares, vaultName,
-        ...(custodianNames ? { custodianNames } : {}),
-        ...(savePath       ? { savePath }       : {}),
+        ...(custodianNames    ? { custodianNames }       : {}),
+        ...(savePath          ? { savePath }             : {}),
+        ...(effectiveSelect   ? { select: effectiveSelect } : {}),
     };
 }
 
@@ -466,6 +503,7 @@ function formatConfigPreview(cfg) {
         `source     ${cfg.source}`,
         `vault      ${cfg.vaultName}`,
         `unlock     ${cfg.threshold} of ${cfg.shares} shares`,
+        cfg.select         ? `select     ${cfg.select}` : null,
         cfg.custodianNames ? `custodians ${cfg.custodianNames.join(', ')}` : null,
         cfg.savePath       ? `savePath   ${cfg.savePath}`                  : null,
     ].filter(Boolean).join('\n');

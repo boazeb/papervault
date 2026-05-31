@@ -126,13 +126,14 @@ export function createAzureKVSource(vaultName, opts = {}) {
                 } catch (err) {
                     throw new Error(`azure-kv: failed to fetch secret "${r.name}" — ${err.message ?? err}`);
                 }
-                const contentType = val.properties?.contentType;
+                // Deliberately do NOT auto-populate `notes` from contentType:
+                // every char counts against the 300-char vault budget, and the
+                // user didn't ask for that metadata. If they want notes, they
+                // can pre-export to a file:// source and edit.
                 secrets.push({
                     kind: 'apikey',
                     service: r.name,
                     key: val.value,
-                    secret: '',
-                    notes: contentType ? `contentType: ${contentType}` : '',
                 });
             }
             return {

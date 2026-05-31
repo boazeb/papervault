@@ -11,9 +11,24 @@ import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { createHash } from 'node:crypto';
 
-import { createKit } from '@papervault/core';
+import { createKit, LIMITS } from '@papervault/core';
 import { resolveSource, SUPPORTED_SOURCES } from '@papervault/cli/sources';
 import { audit } from '@papervault/cli/audit';
+
+// Rough per-secret value-length guess. Conservative; real values vary
+// widely (passwords ~16, BIP39 seeds ~100+, JWTs >150). Used only to give
+// agents a "will this fit?" signal in dry_run before they fetch values.
+const TYPICAL_VALUE_CHAR_GUESS = 60;
+
+function estimateChars(refs) {
+    const lower = refs.reduce((sum, r) => sum + (r.name?.length ?? 0), 0);
+    return {
+        lower_bound: lower,
+        rough_estimate: lower + refs.length * TYPICAL_VALUE_CHAR_GUESS,
+        max_allowed: LIMITS.MAX_STORAGE,
+        note: `lower_bound is exact (sum of secret-name lengths). rough_estimate adds ~${TYPICAL_VALUE_CHAR_GUESS} chars per secret as a value-length guess. Actual count is only known after fetch; backup will refuse if over max_allowed.`,
+    };
+}
 
 import {
     HARD_MAX_SECRETS, HARD_MAX_SHARES, MAX_AUDIT_LIMIT,
@@ -212,8 +227,10 @@ export async function handleDryRun(args) {
             secret_count: selectedRefs.length,
             name_fingerprint: fp,
             kinds_summary: summarizeKinds(selectedRefs),
+            char_estimate: estimateChars(selectedRefs),
             note: 'Run papervault_backup_from_source with the same source_uri and select to commit. ' +
-                'Compare name_fingerprint between runs to confirm the same set of secrets.',
+                'Compare name_fingerprint between runs to confirm the same set of secrets. ' +
+                'If rough_estimate is near or above max_allowed, tighten select before backup.',
         });
     } catch (err) {
         try { await src.close(); } catch {}

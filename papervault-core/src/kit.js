@@ -31,6 +31,27 @@ function pickThreeColors() {
 }
 
 /**
+ * Compute per-entry char contribution (matches countUserContent semantics:
+ * all non-empty string fields except `kind`). Returns entries sorted by
+ * char count descending — used to call out the biggest offenders when a
+ * vault exceeds MAX_STORAGE.
+ */
+function summarizeCharsPerEntry(secrets) {
+    if (!Array.isArray(secrets)) return [];
+    return secrets.map(s => {
+        let chars = 0;
+        if (s && typeof s === 'object') {
+            for (const [key, val] of Object.entries(s)) {
+                if (key === 'kind') continue;
+                if (typeof val === 'string' && val) chars += val.length;
+            }
+        }
+        const name = s?.name ?? s?.label ?? s?.service ?? s?.title ?? '<unnamed>';
+        return { name, chars };
+    }).sort((a, b) => b.chars - a.chars);
+}
+
+/**
  * @typedef {object} KitPage
  * @property {'vault'|'key'} kind
  * @property {string} filename       Filesystem-safe basename (no extension)
@@ -106,10 +127,14 @@ export async function createKit(opts) {
         throw new Error('createKit: no secrets to back up.');
     }
     if (userChars > LIMITS.MAX_STORAGE) {
+        // Surface the top contributors so the user knows what to drop.
+        const top = summarizeCharsPerEntry(secrets).slice(0, 3);
+        const topStr = top.map(t => `"${t.name}" (${t.chars})`).join(', ');
         throw new Error(
-            `createKit: ${userChars} chars of secret content exceeds the ${LIMITS.MAX_STORAGE}-char limit. ` +
-            `This matches papervault.xyz's storage cap so the QR codes stay scannable. ` +
-            `Trim the secrets, split into multiple vaults, or remove low-priority entries.`
+            `createKit: ${userChars}/${LIMITS.MAX_STORAGE} chars used. ` +
+            (top.length > 0 ? `Largest entries: ${topStr}. ` : '') +
+            `Matches papervault.xyz so QR codes stay scannable on paper. ` +
+            `Drop one or more entries, shorten them, or split across multiple vaults.`
         );
     }
 

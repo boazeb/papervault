@@ -1,4 +1,5 @@
 import { parseArgs } from 'node:util';
+import * as clack from '@clack/prompts';
 import { LIMITS } from '@papervault/core';
 import { resolveSource } from '../sources/index.js';
 import { audit } from '../audit.js';
@@ -24,6 +25,9 @@ Required:
 Optional:
   --name <text>          Vault name shown on the printed kit
   --select <glob,glob>   Filter source secrets by glob pattern (comma-separated)
+  --interactive          After listing+filtering, show a multiselect so you can
+                         narrow the picks before fetching values. Useful for
+                         cloud sources with many entries. Implies --no-yes.
   --names <a,b,c>        Custodian names per share (e.g. "alice,bob,carol")
   --max-secrets N        Hard cap on number of secrets (default 20)
   --save <dir>           Also write HTML files to <dir>/vault-<id>/
@@ -46,6 +50,7 @@ const OPTIONS = {
     shares:        { type: 'string' },
     name:          { type: 'string' },
     select:        { type: 'string' },
+    interactive:   { type: 'boolean' },
     names:         { type: 'string' },
     'max-secrets': { type: 'string' },
     save:          { type: 'string' },
@@ -106,9 +111,28 @@ export async function backup(argv) {
     if (selectedRefs.length === 0) {
         throw new Error('No secrets matched the selection.');
     }
+
+    // --interactive: let the user narrow down before we hit max_secrets or
+    // fetch any values. Runs AFTER --select so the glob can pre-filter; the
+    // multiselect picks from what's left.
+    if (values.interactive) {
+        const picked = await clack.multiselect({
+            message: `Pick which to back up (${selectedRefs.length} match${selectedRefs.length === 1 ? '' : 'es'}):`,
+            options: selectedRefs.map(r => ({ value: r.name, label: `${r.name} [${r.kind}]` })),
+            required: true,
+        });
+        if (clack.isCancel(picked)) {
+            process.stderr.write('Aborted.\n');
+            await src.close();
+            return;
+        }
+        const pickedSet = new Set(picked);
+        selectedRefs = selectedRefs.filter(r => pickedSet.has(r.name));
+    }
+
     if (selectedRefs.length > maxSecrets) {
         throw new Error(`${selectedRefs.length} secrets matched, but --max-secrets is ${maxSecrets}. ` +
-            'Tighten --select or raise --max-secrets explicitly.');
+            'Tighten --select, use --interactive to pick fewer, or raise --max-secrets explicitly.');
     }
 
     process.stderr.write(`Source: ${src.uri}\n`);
