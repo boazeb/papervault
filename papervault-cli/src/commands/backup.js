@@ -27,7 +27,7 @@ Optional:
   --select <glob,glob>   Filter source secrets by glob pattern (comma-separated)
   --interactive          After listing+filtering, show a multiselect so you can
                          narrow the picks before fetching values. Useful for
-                         cloud sources with many entries. Implies --no-yes.
+                         cloud sources with many entries.
   --names <a,b,c>        Custodian names per share (e.g. "alice,bob,carol")
   --max-secrets N        Hard cap on number of secrets (default 20)
   --save <dir>           Also write HTML files to <dir>/vault-<id>/
@@ -114,10 +114,11 @@ export async function backup(argv) {
 
     // --interactive: let the user narrow down before we hit max_secrets or
     // fetch any values. Runs AFTER --select so the glob can pre-filter; the
-    // multiselect picks from what's left.
-    if (values.interactive) {
+    // multiselect picks from what's left. Skip if only one match — there's
+    // nothing to pick.
+    if (values.interactive && selectedRefs.length > 1) {
         const picked = await clack.multiselect({
-            message: `Pick which to back up (${selectedRefs.length} match${selectedRefs.length === 1 ? '' : 'es'}):`,
+            message: `Pick which to back up (${selectedRefs.length} matches):`,
             options: selectedRefs.map(r => ({ value: r.name, label: `${r.name} [${r.kind}]` })),
             required: true,
         });

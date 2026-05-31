@@ -15,6 +15,12 @@ import { createKit, LIMITS } from '@papervault/core';
 import { resolveSource, SUPPORTED_SOURCES } from '@papervault/cli/sources';
 import { audit } from '@papervault/cli/audit';
 
+import {
+    HARD_MAX_SECRETS, HARD_MAX_SHARES, MAX_AUDIT_LIMIT,
+    validateSavePath, validateInteger, validateString, validateNames,
+    makeGlobFilter,
+} from './safety.js';
+
 // Rough per-secret value-length guess. Conservative; real values vary
 // widely (passwords ~16, BIP39 seeds ~100+, JWTs >150). Used only to give
 // agents a "will this fit?" signal in dry_run before they fetch values.
@@ -29,12 +35,6 @@ function estimateChars(refs) {
         note: `lower_bound is exact (sum of secret-name lengths). rough_estimate adds ~${TYPICAL_VALUE_CHAR_GUESS} chars per secret as a value-length guess. Actual count is only known after fetch; backup will refuse if over max_allowed.`,
     };
 }
-
-import {
-    HARD_MAX_SECRETS, HARD_MAX_SHARES, MAX_AUDIT_LIMIT,
-    validateSavePath, validateInteger, validateString, validateNames,
-    makeGlobFilter,
-} from './safety.js';
 
 /** Helper: wrap structured data in MCP's content-array format. */
 function ok(data) {

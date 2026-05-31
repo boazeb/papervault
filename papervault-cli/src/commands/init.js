@@ -178,10 +178,11 @@ export async function init(argv) {
                 if (!skip) { p.cancel('Aborted.'); return; }
             }
 
-            // Multiselect which secrets the saved config should target. Skip
-            // if the listing failed, the KV is empty, or there are only a
-            // few (≤3) where filtering adds no value.
-            if (azureRefs && azureRefs.length > 3) {
+            // Multiselect which secrets the saved config should target.
+            // Skip only if the listing failed or the KV is empty. Even 1
+            // secret might be too big for the vault, so always offer the
+            // choice when there's something to pick.
+            if (azureRefs && azureRefs.length > 0) {
                 p.log.info(
                     `Vaults cap at ${LIMITS.MAX_STORAGE} chars of user content total (so QR codes stay scannable). ` +
                     `Pick which secrets the backup should include — you can leave it empty to back up everything.`
@@ -194,9 +195,18 @@ export async function init(argv) {
                         `likely above the ${LIMITS.MAX_STORAGE} limit. Pick a subset below.`
                     );
                 }
+                // Pre-check what the existing config already selected so an
+                // edit-mode init doesn't drop prior intent.
+                const previouslySelected = prefill?.select
+                    ? new Set(prefill.select.split(',').map(s => s.trim()).filter(Boolean))
+                    : null;
+                const initialValues = previouslySelected
+                    ? azureRefs.map(r => r.name).filter(n => previouslySelected.has(n))
+                    : undefined;
                 const picked = cancelIf(await p.multiselect({
                     message: `Secrets to back up (none = all ${azureRefs.length}):`,
                     options: azureRefs.map(r => ({ value: r.name, label: r.name })),
+                    initialValues,
                     required: false,
                 }));
                 if (picked.length > 0 && picked.length < azureRefs.length) {

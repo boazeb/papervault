@@ -132,13 +132,19 @@ export async function createKit(opts) {
         // undercut our "names hashed by default" promise. Sizes alone
         // let the user identify the heaviest entries when they inspect
         // their own source.
+        const numEntries = Array.isArray(secrets) ? secrets.length : 0;
+        const freeTextChars = (freeText && typeof freeText === 'string') ? freeText.length : 0;
         const sizes = summarizeCharsPerEntry(secrets).slice(0, 5).map(t => t.chars);
+        const breakdown = [
+            `${numEntries} entr${numEntries === 1 ? 'y' : 'ies'}`,
+            freeTextChars > 0 ? `freeText (${freeTextChars} chars)` : null,
+        ].filter(Boolean).join(' + ');
         const sizesStr = sizes.length > 0 ? `Largest entries by chars: ${sizes.join(', ')}. ` : '';
         throw new Error(
-            `createKit: ${userChars}/${LIMITS.MAX_STORAGE} chars used by ${secrets.length} entries. ` +
+            `createKit: ${userChars}/${LIMITS.MAX_STORAGE} chars used (${breakdown}). ` +
             sizesStr +
             `Matches papervault.xyz so QR codes stay scannable on paper. ` +
-            `Drop or shorten entries, or split across multiple vaults.`
+            `Drop or shorten entries${freeTextChars > 0 ? ' or freeText' : ''}, or split across multiple vaults.`
         );
     }
 
