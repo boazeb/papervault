@@ -1,0 +1,219 @@
+# CI checks to run when a PR is opened, or manually via workflow_dispatch
+name: 🚦 CI
+
+on:
+  pull_request:
+    branches: ['main']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: 🔎 Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      lockfile: ${{ steps.filter.outputs.lockfile }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Filter Paths
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            lockfile:
+              - 'yarn.lock'
+              - 'package.json'
+              - 'papervault-*/package.json'
+              - 'papervault-*/package-lock.json'
+            workflows:
+              - '.github/workflows/**'
+
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'yarn'
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run Tests
+        run: yarn test --watchAll=false
+
+  build:
+    name: 🏗️ Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'yarn'
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build Project
+        run: yarn build
+
+      - name: Verify Build Output
+        run: |
+          if [ ! -d "build" ]; then
+            echo "❌ Build failed: build directory not created"
+            exit 1
+          fi
+          if [ ! -f "build/index.html" ]; then
+            echo "❌ Build failed: index.html not found"
+            exit 1
+          fi
+          echo "✅ Build successful"
+
+  docker-smoke:
+    name: 🐳 Docker Smoke Test
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Build & Test Docker Image
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          docker build -t papervault-smoke .
+          docker run -d --rm --name papervault-smoke -p 3000:3000 papervault-smoke
+          trap 'docker stop papervault-smoke >/dev/null 2>&1 || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/ >/dev/null; then break; fi
+            if [ "$i" = "30" ]; then
+              echo "❌ App did not respond within 30s"
+              docker logs papervault-smoke
+              exit 1
+            fi
+            sleep 1
+          done
+          curl -sf http://localhost:3000/ | grep -qi '<div id="root"'
+          echo "✅ Docker image builds and serves the app"
+
+  dependency-review:
+    name: 🔒 Dependency Audit
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.lockfile == 'true' && github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Review Dependencies
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: moderate
+
+  secret-scan:
+    name: 🔑 Secret Scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Scan PR Diff for Secrets
+        uses: trufflesecurity/trufflehog@v3.95.5
+        with:
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+          extra_args: --only-verified
+
+  workflow-audit:
+    name: 🛠️ Workflow Audit
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.workflows == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Run Actionlint
+        uses: raven-actions/actionlint@v2
+        with:
+          fail-on-error: true
+
+      - name: Run Zizmor
+        uses: zizmorcore/zizmor-action@v0.5.6
+        with:
+          inputs: .github/workflows/
+          advanced-security: false
+          annotations: true
+
+  # Renders markdown summary of all checks at the end
+  summary:
+    name: 📋 Summary
+    runs-on: ubuntu-latest
+    if: always()
+    continue-on-error: true
+    needs:
+      - test
+      - build
+      - docker-smoke
+      - dependency-review
+      - secret-scan
+      - workflow-audit
+    steps:
+      - name: Render Summary
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          label() {
+            case "$1" in
+              test) echo "🧪 Test" ;;
+              build) echo "🏗️ Build" ;;
+              docker-smoke) echo "🐳 Docker Smoke" ;;
+              dependency-review) echo "🔒 Dependency Audit" ;;
+              secret-scan) echo "🔑 Secret Scan" ;;
+              workflow-audit) echo "🛠️ Workflow Audit" ;;
+              *) echo "$1" ;;
+            esac
+          }
+          status() {
+            case "$1" in
+              success) echo "✅ Passed" ;;
+              skipped) echo "⏭️ Skipped" ;;
+              cancelled) echo "🚫 Cancelled" ;;
+              failure) [ "$2" = docker-smoke ] && echo "⚠️ Warnings" || echo "❌ Failed" ;;
+              *) echo "❔ $1" ;;
+            esac
+          }
+          {
+            echo "## CI Summary"
+            echo ""
+            echo "| Check | Status |"
+            echo "|-------|--------|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for job in $(echo "$NEEDS" | jq -r 'keys[]'); do
+            result=$(echo "$NEEDS" | jq -r --arg j "$job" '.[$j].result')
+            echo "| $(label "$job") | $(status "$result" "$job") |" >> "$GITHUB_STEP_SUMMARY"
+          done

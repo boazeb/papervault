@@ -1,0 +1,364 @@
+# Builds and publishes the multi-arch Docker image
+#
+# Triggered by:
+# - On git tag push, publishes to :X.Y.Z, :X.Y, and :latest
+# - On manual trigger, rebuilds and updates :latest or tag if specified
+# - On weekly cron, rebuilds :latest from main for upstream patches
+#
+# The workflow will:
+# - Builds multi-arch (amd64, arm64, armv7) in parallel on native runners
+# - Trivy scans + reports security issues, and fails cron on CRITICAL CVEs
+# - Publishes to GHCR, and to Docker Hub if creds are configured
+# - Attests both the build provenance and SBOM and publishes to GHCR
+# - Uploads per-arch digests as artifacts, and writes a pretty job summary
+
+name: 🐳 Docker
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (empty = build current ref as :latest. tag must exist in git)'
+        required: false
+        default: ''
+      latest:
+        description: 'Also update the :latest tag (only used when a tag is specified)'
+        required: false
+        type: boolean
+        default: false
+  push:
+    # Bare X.Y.Z app tags only — must not match the v-prefixed npm package tags
+    tags: ['[0-9]*.[0-9]*.[0-9]*']
+  schedule:
+    - cron: '0 4 * * 0'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.tag }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read  # least-privilege default; jobs elevate as needed
+
+env:
+  DH_IMAGE: ${{ vars.DOCKER_REPO || 'boazeb/papervault' }}
+  GH_IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  build:
+    name: 🔨 Build (${{ matrix.arch }})
+    timeout-minutes: 30
+    permissions:
+      contents: read          # checkout
+      packages: write         # push image by digest to GHCR
+      security-events: write  # upload Trivy SARIF to code scanning
+    env:
+      DOCKER_BUILD_SUMMARY: "false"
+      DOCKER_BUILD_RECORD_UPLOAD: "false"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
+          - platform: linux/arm/v7
+            runner: ubuntu-latest
+            arch: armv7
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: 🛎️ Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: 🏷️ Resolve build version
+        id: version
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -n "$INPUT_TAG" ]; then
+            v="$INPUT_TAG"
+          elif [ "$EVENT_NAME" = "push" ]; then
+            v="$REF_NAME"
+          else
+            v="latest"
+          fi
+          echo "value=$v" >> "$GITHUB_OUTPUT"
+          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: 🔧 Set up QEMU
+        if: matrix.arch == 'armv7'
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: linux/arm/v7
+
+      - name: 🔧 Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: 🔑 Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ⏱️ Capture build timestamp
+        id: timestamp
+        run: echo "iso=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+
+      - name: 🔨 Build image (load for scan)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,scope=${{ matrix.arch }},mode=max
+          load: true
+          tags: papervault-scan:${{ matrix.arch }}
+          provenance: false
+          build-args: |
+            VERSION=${{ steps.version.outputs.value }}
+            REVISION=${{ steps.version.outputs.revision }}
+            CREATED=${{ steps.timestamp.outputs.iso }}
+
+      - name: 🛡️ Trivy vulnerability scan
+        id: scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db:2
+          TRIVY_JAVA_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-java-db:1
+        with:
+          version: v0.70.0
+          image-ref: papervault-scan:${{ matrix.arch }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: ${{ github.event_name == 'schedule' && '1' || '0' }}
+          vuln-type: 'os,library'
+          format: 'sarif'
+          output: 'trivy-${{ matrix.arch }}.sarif'
+          timeout: '10m'
+
+      # If CVEs found, print them in human readable table so i can read and address them
+      - name: 📋 List blocking CVEs (on scan failure)
+        if: always() && steps.scan.outcome == 'failure'
+        uses: aquasecurity/trivy-action@v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db:2
+          TRIVY_JAVA_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-java-db:1
+        with:
+          version: v0.70.0
+          image-ref: papervault-scan:${{ matrix.arch }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '0'
+          vuln-type: 'os,library'
+          format: 'table'
+          timeout: '10m'
+
+      - name: 📤 Upload Trivy SARIF
+        if: always() && hashFiles(format('trivy-{0}.sarif', matrix.arch)) != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-${{ matrix.arch }}.sarif
+          category: trivy-${{ matrix.arch }}
+
+      - name: 🚀 Push by digest
+        id: push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          outputs: type=image,name=${{ env.GH_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          provenance: false
+          build-args: |
+            VERSION=${{ steps.version.outputs.value }}
+            REVISION=${{ steps.version.outputs.revision }}
+            CREATED=${{ steps.timestamp.outputs.iso }}
+
+      - name: 🧬 Write digest
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+          DIGESTS_DIR: ${{ runner.temp }}/digests
+          ARCH: ${{ matrix.arch }}
+        run: |
+          mkdir -p "$DIGESTS_DIR"
+          echo "$DIGEST" > "$DIGESTS_DIR/$ARCH"
+
+      - name: 📤 Upload digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digest-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/${{ matrix.arch }}
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: 🧩 Merge & Push Manifests
+    needs: build
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read       # least-privilege baseline
+      packages: write      # push manifest + attestations to GHCR
+      id-token: write      # OIDC token for keyless attestation signing
+      attestations: write  # write SBOM + provenance attestations
+    env:
+      HAS_DH: ${{ vars.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
+      SEMVER_VALUE: ${{ inputs.tag || github.ref_name }}
+      SEMVER_ENABLE: ${{ github.event_name == 'push' || inputs.tag != '' }}
+      LATEST_ENABLE: ${{ inputs.tag == '' || inputs.latest == true }}
+    steps:
+      - name: 📥 Download digests
+        uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digest-*
+          merge-multiple: true
+
+      - name: 🔧 Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: 🔑 Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔑 Login to Docker Hub
+        if: env.HAS_DH == 'true'
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 🗂️ Generate tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ${{ env.GH_IMAGE }}
+            ${{ env.HAS_DH == 'true' && env.DH_IMAGE || '' }}
+          tags: |
+            type=raw,value=latest,enable=${{ env.LATEST_ENABLE }}
+            type=semver,pattern={{version}},value=${{ env.SEMVER_VALUE }},enable=${{ env.SEMVER_ENABLE }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ env.SEMVER_VALUE }},enable=${{ env.SEMVER_ENABLE }}
+            type=semver,pattern={{major}}.x,value=${{ env.SEMVER_VALUE }},enable=${{ env.SEMVER_ENABLE }}
+          flavor: |
+            latest=false
+
+      - name: 🧩 Create & push manifest
+        id: manifest
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          set -euo pipefail
+          TAGS=()
+          while IFS= read -r tag; do TAGS+=(-t "$tag"); done \
+            < <(jq -r '.tags[]' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          SOURCES=()
+          for f in *; do SOURCES+=("${GH_IMAGE}@$(cat "$f")"); done
+          docker buildx imagetools create "${TAGS[@]}" "${SOURCES[@]}"
+          PRIMARY=$(jq -r --arg img "$GH_IMAGE" \
+            '[.tags[] | select(startswith($img + ":"))] | first // empty' \
+            <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          DIGEST=$(docker buildx imagetools inspect "$PRIMARY" --format '{{.Manifest.Digest}}')
+          echo "primary_tag=$PRIMARY" >> "$GITHUB_OUTPUT"
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: 🔐 Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0.24.0
+        with:
+          image: ${{ steps.manifest.outputs.primary_tag }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+          upload-artifact: false
+
+      - name: 🪪 Attest SBOM
+        id: attest_sbom
+        uses: actions/attest@v4
+        continue-on-error: true
+        with:
+          subject-name: ${{ env.GH_IMAGE }}
+          subject-digest: ${{ steps.manifest.outputs.digest }}
+          sbom-path: sbom.spdx.json
+          push-to-registry: true
+          show-summary: false
+
+      - name: 🛡️ Attest build provenance
+        id: attest_provenance
+        uses: actions/attest-build-provenance@v4
+        continue-on-error: true
+        with:
+          subject-name: ${{ env.GH_IMAGE }}
+          subject-digest: ${{ steps.manifest.outputs.digest }}
+          push-to-registry: true
+          show-summary: false
+
+      - name: 📋 Job summary
+        if: always()
+        continue-on-error: true
+        env:
+          SBOM_OUTCOME: ${{ steps.attest_sbom.outcome }}
+          SBOM_URL: ${{ steps.attest_sbom.outputs.attestation-url }}
+          PROV_OUTCOME: ${{ steps.attest_provenance.outcome }}
+          PROV_URL: ${{ steps.attest_provenance.outputs.attestation-url }}
+          MANIFEST: ${{ steps.manifest.outputs.digest }}
+          PRIMARY: ${{ steps.manifest.outputs.primary_tag }}
+          TAGS_JSON: ${{ steps.meta.outputs.json }}
+          DIGESTS_DIR: ${{ runner.temp }}/digests
+        run: |
+          set -euo pipefail
+          repo="${PRIMARY%%:*}"
+
+          attest() {
+            case "$2" in
+              success) [ -n "$3" ] && echo "- ✅ $1 attested ([view]($3))" || echo "- ✅ $1 attested" ;;
+              failure) echo "- ⚠️ $1 attestation failed" ;;
+              *) echo "- ⏭️ $1 attestation skipped" ;;
+            esac
+          }
+
+          {
+            echo "## Attestations"
+            echo
+            attest "SBOM" "$SBOM_OUTCOME" "$SBOM_URL"
+            attest "Build provenance" "$PROV_OUTCOME" "$PROV_URL"
+            echo
+            echo "---"
+            echo
+            echo "## Build Info"
+            echo
+            echo "| Arch | Size | Layers | Digest |"
+            echo "|---|---|---|---|"
+            for arch in amd64 arm64 armv7; do
+              f="$DIGESTS_DIR/$arch"
+              [ -f "$f" ] || continue
+              digest=$(cat "$f")
+              raw=$(docker buildx imagetools inspect "$repo@$digest" --raw 2>/dev/null || echo '{}')
+              bytes=$(jq '[.layers[]?.size // 0] | add // 0' <<< "$raw")
+              size=$(numfmt --to=iec --suffix=B "$bytes" 2>/dev/null || echo "${bytes}B")
+              layers=$(jq '.layers // [] | length' <<< "$raw")
+              echo "| \`$arch\` | $size | $layers | \`$digest\` |"
+            done
+            echo
+            echo "---"
+            echo
+            echo "## Docker Image"
+            echo
+            echo "**Manifest:** \`$MANIFEST\`"
+            echo
+            echo "The following tags have been updated and published:"
+            echo
+            echo '```'
+            if [ -n "${TAGS_JSON:-}" ]; then jq -r '.tags[]?' <<< "$TAGS_JSON"; fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
