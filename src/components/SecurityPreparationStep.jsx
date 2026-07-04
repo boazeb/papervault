@@ -24,8 +24,9 @@ const SecurityPreparationStep = ({ isOnline, onContinue, onBack }) => {
             return; // Can't uncheck offline when actually offline
         }
         
-        // Allow checking offline if user chose to proceed online
+        // Checking offline while online counts as accepting the risk
         if (item === 'offline' && isOnline && !proceedOnline) {
+            handleProceedOnline();
             return;
         }
         
