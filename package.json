@@ -52,7 +52,7 @@
     "react-loading-icons": "^1.1.0",
     "react-router-dom": "^6.2.1",
     "react-scripts": "^5.0.1",
-    "react-to-print": "^2.14.12",
+    "react-to-print": "^3.3.0",
     "secrets.js": "^0.1.8",
     "shamir-secret-sharing": "^0.0.4",
     "stream-browserify": "^3.0.0",
