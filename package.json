@@ -28,7 +28,7 @@
   "dependencies": {
     "@react-pdf/renderer": "^4.3.2",
     "@testing-library/jest-dom": "^5.16.2",
-    "@testing-library/react": "^12.1.2",
+    "@testing-library/react": "^16.3.2",
     "@yudiel/react-qr-scanner": "2.5.1",
     "bip39": "^3.1.0",
     "bootstrap": "^5.1.3",
