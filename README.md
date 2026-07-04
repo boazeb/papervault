@@ -34,8 +34,8 @@ Run the same web app on your own machine, ideally air-gapped.
 ```bash
 git clone https://github.com/boazeb/papervault.git
 cd papervault
-yarn install
-yarn start
+npm install
+npm start
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
