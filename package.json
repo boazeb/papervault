@@ -44,7 +44,7 @@
     "process": "^0.11.10",
     "qrcode": "^1.5.3",
     "qrcode.react": "^2.0.0",
-    "react": "^17.0.2",
+    "react": "^19.2.7",
     "react-app-rewired": "^2.2.1",
     "react-bootstrap": "^2.1.2",
     "react-dom": "^17.0.2",
