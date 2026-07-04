@@ -25,7 +25,9 @@ const PreparationStep = ({ isOnline, onContinue }) => {
             return; // Can't uncheck offline when actually offline
         }
         
+        // Checking offline while online counts as accepting the risk
         if (item === 'offline' && isOnline && !proceedOnline) {
+            handleProceedOnline();
             return;
         }
         

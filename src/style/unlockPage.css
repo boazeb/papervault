@@ -1053,7 +1053,6 @@
 
 .checklist-item.disabled {
     opacity: 0.6;
-    cursor: not-allowed;
     background: rgba(244, 67, 54, 0.05);
     border: 1px solid rgba(244, 67, 54, 0.2);
 }
