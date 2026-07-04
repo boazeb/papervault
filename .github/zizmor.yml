@@ -1,0 +1,17 @@
+# zizmor config, for the static analysis of our GH Actions workflows
+# Run with: `zizmor .github/workflows/`. Docs: https://docs.zizmor.sh
+# Scan is also run in our ci.yml, whenever workflow changes are made
+
+# 2 rules are disabled right now:
+# - unpinned-uses: The only unpinned versions are official ones.
+#   And in the context of each, there shouldn't be any risk.
+#   Pinning causes the need to update each whenever a new version or patch is released
+# - artipacked: Too many false positives.
+#   Was flagging every `actions/checkout` for not having `persist-credentials: false`
+#   Even tho we never upload or do anything public with the checkout artifacts
+
+rules:
+  unpinned-uses:
+    disable: true
+  artipacked:
+    disable: true

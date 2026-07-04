@@ -1,0 +1,26 @@
+# Syncs the full source of the PaperVault repo over to our Codeberg mirror
+name: 🪞 Mirror
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 3 * * 0' # At 03:30 on Sunday
+
+permissions:
+  contents: read
+
+jobs:
+  codeberg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: lissy93/repo-mirror-action@v1.6.0
+        with:
+          ssh_key: ${{ secrets.CODEBERG_SSH }}
+          host: git@codeberg.org
+          user: boazeb
+          repo: papervault
+          force_push: false
+
+# Setup: create an empty repo on the mirror host, generate an SSH keypair,
+# add the public key as a deploy key (with write access) on the mirror repo,
+# and save the private key as the CODEBERG_SSH secret in this repo.
+# Full docs: https://github.com/Lissy93/repo-mirror-action
