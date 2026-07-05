@@ -37,7 +37,7 @@ jobs:
       TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - name: 🛎️ Checkout tag
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: refs/tags/${{ env.TAG }}
           fetch-depth: 0
