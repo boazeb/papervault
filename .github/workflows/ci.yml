@@ -163,7 +163,7 @@ jobs:
           fail-on-error: true
 
       - name: Run Zizmor
-        uses: zizmorcore/zizmor-action@v0.5.6
+        uses: zizmorcore/zizmor-action@v0.5.7
         with:
           inputs: .github/workflows/
           advanced-security: false
