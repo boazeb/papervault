@@ -69,7 +69,7 @@ jobs:
       - name: 📂 Check PR for code changes and version bump
         id: check_pr
         if: env.IS_MANUAL != 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { owner, repo } = context.repo;
