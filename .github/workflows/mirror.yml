@@ -16,7 +16,7 @@ jobs:
         with:
           ssh_key: ${{ secrets.CODEBERG_SSH }}
           host: git@codeberg.org
-          user: boazeb
+          user: boaz
           repo: papervault
           force_push: false
 

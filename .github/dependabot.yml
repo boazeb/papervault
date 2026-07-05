@@ -6,6 +6,16 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    ignore:
+      # QR scanner stack is deliberately pinned to match the committed
+      # public/wasm/zxing_reader.wasm binary — do NOT auto-bump (see fd9d7b4).
+      - dependency-name: "@yudiel/react-qr-scanner"
+      - dependency-name: "barcode-detector"
+      - dependency-name: "zxing-wasm"
+      # Major bumps need manual migration (e.g. React 17→19); only auto-PR
+      # minor/patch updates for the rest.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
   # Keep the GitHub Actions used by the CI/CD workflows up to date
   - package-ecosystem: "github-actions"
     directory: "/"
