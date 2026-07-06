@@ -1,6 +1,6 @@
 {
   "name": "papervault",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "private": true,
   "description": "Open source cryptographic secret sharing tool for secure paper-based cold storage vaults",
   "homepage": "https://papervault.xyz",

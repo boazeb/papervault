@@ -48,10 +48,10 @@ jobs:
           node-version: '24'
 
       - name: 📥 Install dependencies
-        run: yarn install --frozen-lockfile --network-timeout 300000
+        run: npm ci
 
       - name: 🏗️ Build app
-        run: yarn build
+        run: npm run build
 
       - name: 📦 Package release tarball
         id: package
