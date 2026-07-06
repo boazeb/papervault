@@ -25,9 +25,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: macos-latest,  label: macOS (arm64),  asset: papervault-macos-arm64 }
-          - { os: ubuntu-latest, label: Linux (x64),    asset: papervault-linux-x64 }
-          - { os: windows-latest, label: Windows (x64), asset: papervault-windows-x64.exe }
+          - { os: macos-latest,  label: macOS (arm64) }
+          - { os: ubuntu-latest, label: Linux (x64) }
+          - { os: windows-latest, label: Windows (x64) }
     steps:
       - name: 🛎️ Checkout tag
         uses: actions/checkout@v7
@@ -50,25 +50,24 @@ jobs:
       - name: 📦 Build single-file executable
         run: node scripts/build-sea.mjs
 
-      - name: 🏷️ Name the binary
-        id: rename
+      - name: 🎁 Package for distribution
+        id: pkg
         shell: bash
         run: |
-          SRC=dist/papervault
-          [ "${{ runner.os }}" = "Windows" ] && SRC=dist/papervault.exe
-          DEST="dist/${{ matrix.asset }}"
-          mv "$SRC" "$DEST"
-          echo "path=$DEST" >> "$GITHUB_OUTPUT"
+          node scripts/package-sea.mjs
+          echo "path=$(cat dist/artifact-path.txt)" >> "$GITHUB_OUTPUT"
+        env:
+          PV_VERSION: ${{ inputs.tag || github.ref_name }}
 
       - name: 🪪 Attest build provenance
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: ${{ steps.rename.outputs.path }}
+          subject-path: ${{ steps.pkg.outputs.path }}
 
       - name: 📤 Attach to the release
         uses: softprops/action-gh-release@v3 # zizmor: ignore[superfluous-actions]
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
-          files: ${{ steps.rename.outputs.path }}
+          files: ${{ steps.pkg.outputs.path }}
           draft: true
           fail_on_unmatched_files: true

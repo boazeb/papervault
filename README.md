@@ -16,7 +16,7 @@ Pick what fits:
 |---|---|
 | [Web app](#-web-app) | Zero install, runs in any browser |
 | [Self-hosted web app](#-self-hosted-web-app-recommended-for-maximum-security) | Maximum security, air-gapped |
-| [Standalone app](#-standalone-app-single-executable) | Offline use, zero install — one file, no Node/npm |
+| [Standalone app](#-standalone-app-single-executable) | Offline use — download &amp; double-click, no Node/npm |
 | [Command line](#-command-line) | Scripts, `.env` imports, pulling from secret stores |
 | [AI agents (MCP)](#-ai-agents-claude-code-cursor-other-mcp-clients) | Backing up secrets before risky operations |
 | [Docker](#-docker) | Containerized deployment |
@@ -43,28 +43,29 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### 💾 Standalone app (single executable)
 
-Download one file and run it — no Node, npm, or build step. PaperVault opens in your browser at a local address and runs fully offline.
+A prebuilt PaperVault you download and open — no Node, npm, or build step. It runs a small local server and opens PaperVault in your browser, fully offline.
 
-Grab the binary for your platform from the [**Releases page**](https://github.com/boazeb/papervault/releases/latest):
+Download for your platform from the [**Releases page**](https://github.com/boazeb/papervault/releases/latest):
 
-| Platform | File |
-|---|---|
-| macOS (Apple Silicon) | `papervault-macos-arm64` |
-| Linux (x64) | `papervault-linux-x64` |
-| Windows (x64) | `papervault-windows-x64.exe` |
+| Platform | Download | Run it |
+|---|---|---|
+| **macOS** (Apple Silicon) | `PaperVault-macos-arm64.zip` | Unzip, then double-click **PaperVault** |
+| **Linux** (x64) | `papervault-linux-x64.tar.gz` | `tar xzf papervault-linux-x64.tar.gz && ./papervault` |
+| **Windows** (x64) | `papervault-windows-x64.exe` | Double-click it |
 
-macOS / Linux:
+It serves over `http://127.0.0.1` — a browser "secure context", so the camera, QR scanner, and Web Crypto all work locally. On macOS a small window lets you **Quit**; on Linux/Windows press **Ctrl+C** to stop.
+
+**First launch** — the builds aren't notarized/code-signed yet, so the OS warns once:
+
+- **macOS** (Sequoia / Tahoe): after the first blocked attempt, open **System Settings → Privacy & Security**, find the note about *PaperVault*, and click **Open Anyway**. *(Older macOS: right-click the app → **Open** → **Open**.)*
+- **Windows:** on the SmartScreen dialog, click **More info → Run anyway**.
+- **Linux:** no prompt.
+
+Every artifact carries a signed build-provenance attestation — verify any download with:
 
 ```bash
-chmod +x papervault-macos-arm64
-./papervault-macos-arm64
+gh attestation verify PaperVault-macos-arm64.zip --repo boazeb/papervault
 ```
-
-Windows: double-click `papervault-windows-x64.exe`.
-
-It serves on `http://127.0.0.1` — a browser "secure context", so the camera and QR scanner work — and opens automatically. Keep the window open while you use it; press Ctrl+C to stop.
-
-> Binaries aren't code-signed yet, so the OS warns on first launch — macOS: right-click → **Open**; Windows: **More info → Run anyway**. Every release artifact carries a build-provenance attestation you can verify with `gh attestation verify <file> --repo boazeb/papervault`.
 
 ### 💻 Command line
 
