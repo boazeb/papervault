@@ -6,14 +6,14 @@
 //             a bare binary shows as a dead "?" document — a .app fixes both.
 //   Linux   → dist/papervault-linux-x64.tar.gz  tar preserves the +x bit that a
 //             browser download would otherwise drop.
-//   Windows → dist/papervault-windows-x64.exe   already double-clickable; just
-//             gets its release name.
+//   Windows → dist/papervault-windows-x64.zip   the raw .exe zipped, so the
+//             download is ~40 MB instead of ~110 MB uncompressed.
 //
 // The chosen artifact's repo-relative path is written to dist/artifact-path.txt
 // (forward slashes) so the release workflow can attest + upload it.
 //
 // PV_VERSION (env) stamps the macOS bundle version; defaults to 0.0.0 locally.
-import { execSync } from 'node:child_process';
+import { execSync, execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, readFileSync, copyFileSync, chmodSync, rmSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -95,8 +95,17 @@ function packageLinux() {
 function packageWindows() {
   const exe = join(DIST, 'papervault.exe');
   if (!existsSync(exe)) throw new Error('dist/papervault.exe not found — run `node scripts/build-sea.mjs` first');
-  copyFileSync(exe, join(DIST, 'papervault-windows-x64.exe'));
-  return 'dist/papervault-windows-x64.exe';
+  const named = join(DIST, 'papervault-windows-x64.exe');
+  copyFileSync(exe, named);
+  const zip = join(DIST, 'papervault-windows-x64.zip');
+  rmSync(zip, { force: true });
+  // Compress-Archive ships with PowerShell on every Windows runner. Use
+  // execFileSync (no shell) so the paths don't hit cmd.exe quote-mangling.
+  console.log('$ Compress-Archive papervault-windows-x64.exe -> .zip');
+  execFileSync('powershell', ['-NoProfile', '-Command',
+    `Compress-Archive -Path "${named}" -DestinationPath "${zip}" -Force`,
+  ], { stdio: 'inherit' });
+  return 'dist/papervault-windows-x64.zip';
 }
 
 const artifact = isMac ? packageMac() : isWin ? packageWindows() : packageLinux();

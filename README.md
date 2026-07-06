@@ -51,7 +51,7 @@ Download for your platform from the [**Releases page**](https://github.com/boaze
 |---|---|---|
 | **macOS** (Apple Silicon) | `PaperVault-macos-arm64.zip` | Unzip, then double-click **PaperVault** |
 | **Linux** (x64) | `papervault-linux-x64.tar.gz` | `tar xzf papervault-linux-x64.tar.gz && ./papervault` |
-| **Windows** (x64) | `papervault-windows-x64.exe` | Double-click it |
+| **Windows** (x64) | `papervault-windows-x64.zip` | Unzip, then double-click the `.exe` |
 
 It serves over `http://127.0.0.1` — a browser "secure context", so the camera, QR scanner, and Web Crypto all work locally. On macOS it sits in your **menu bar** (click the icon → **Quit**); on Linux/Windows press **Ctrl+C** to stop.
 
