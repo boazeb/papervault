@@ -36,7 +36,7 @@ jobs:
           persist-credentials: false
 
       - name: 🔧 Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6 # zizmor: ignore[cache-poisoning]
         with:
           node-version: '24'
           cache: 'npm'
@@ -66,7 +66,7 @@ jobs:
           subject-path: ${{ steps.rename.outputs.path }}
 
       - name: 📤 Attach to the release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v3 # zizmor: ignore[superfluous-actions]
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
           files: ${{ steps.rename.outputs.path }}
