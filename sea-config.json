@@ -1,0 +1,8 @@
+{
+  "main": "scripts/sea-server.cjs",
+  "output": "build-sea/sea-prep.blob",
+  "assets": {
+    "app.pack": "build-sea/app.pack"
+  },
+  "disableExperimentalSEAWarning": true
+}

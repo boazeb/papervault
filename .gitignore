@@ -11,6 +11,10 @@ papervault-*/node_modules
 # production
 /build
 
+# single-executable build artifacts
+/dist
+/build-sea
+
 # misc
 .DS_Store
 docs/RENAME-TO-PAPERVAULT.md
