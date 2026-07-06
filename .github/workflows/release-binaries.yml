@@ -1,0 +1,74 @@
+# Builds the single-file executable for each OS and attaches it to the GitHub
+# Release (created by release.yml). Fires on the same X.Y.0 release tags.
+name: 📦 Release Binaries
+on:
+  push:
+    tags: ['[0-9]*.[0-9]*.0']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build binaries for (e.g. 1.2.0)'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 🏗️ ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write      # attach assets to the release
+      id-token: write      # keyless build provenance
+      attestations: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-latest,  label: macOS (arm64),  asset: papervault-macos-arm64 }
+          - { os: ubuntu-latest, label: Linux (x64),    asset: papervault-linux-x64 }
+          - { os: windows-latest, label: Windows (x64), asset: papervault-windows-x64.exe }
+    steps:
+      - name: 🛎️ Checkout tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+          persist-credentials: false
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build app
+        run: npm run build
+
+      - name: 📦 Build single-file executable
+        run: node scripts/build-sea.mjs
+
+      - name: 🏷️ Name the binary
+        id: rename
+        shell: bash
+        run: |
+          SRC=dist/papervault
+          [ "${{ runner.os }}" = "Windows" ] && SRC=dist/papervault.exe
+          DEST="dist/${{ matrix.asset }}"
+          mv "$SRC" "$DEST"
+          echo "path=$DEST" >> "$GITHUB_OUTPUT"
+
+      - name: 🪪 Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: ${{ steps.rename.outputs.path }}
+
+      - name: 📤 Attach to the release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: ${{ steps.rename.outputs.path }}
+          draft: true
+          fail_on_unmatched_files: true
