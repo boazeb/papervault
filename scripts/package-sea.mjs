@@ -46,18 +46,17 @@ function packageMac() {
   copyFileSync(bin, join(resources, 'papervault'));
   chmodSync(join(resources, 'papervault'), 0o755);
 
-  // 2. launcher script is the bundle's main executable.
-  copyFileSync(join(HERE, 'mac-app', 'launcher.sh'), join(macos, 'PaperVault'));
-  chmodSync(join(macos, 'PaperVault'), 0o755);
+  // 2. compile the Swift menu-bar app as the bundle's main executable. It lives
+  //    in the menu bar with a Quit item — no Terminal window, no modal dialog.
+  sh(`swiftc -O -o "${join(macos, 'PaperVault')}" "${join(HERE, 'mac-app', 'launcher.swift')}" -framework AppKit`);
 
   // 3. version-stamped Info.plist.
   const plist = readFileSync(join(HERE, 'mac-app', 'Info.plist'), 'utf8').replaceAll('__VERSION__', VERSION);
   writeFileSync(join(APP, 'Contents', 'Info.plist'), plist);
 
-  // 4. icon (+ a copy the Quit dialog can display), generated from the app logo.
+  // 4. bundle icon, generated from the app logo.
   const logo = join(ROOT, 'public', 'papervault-512.png');
   if (existsSync(logo)) {
-    copyFileSync(logo, join(resources, 'icon.png'));
     const iconset = join(DIST, 'PaperVault.iconset');
     rmSync(iconset, { recursive: true, force: true });
     mkdirSync(iconset, { recursive: true });
