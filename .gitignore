@@ -17,6 +17,7 @@ papervault-*/node_modules
 
 # misc
 .DS_Store
+.claude/
 docs/RENAME-TO-PAPERVAULT.md
 .env
 .env.development
