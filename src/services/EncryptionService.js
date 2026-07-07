@@ -3,8 +3,8 @@ import { split as shamirSplit, combine as shamirCombine } from 'shamir-secret-sh
 import { CURRENT_VAULT_VERSION, VAULT_VERSIONS } from '../config/vaultConfig';
 import { LIMITS } from '../config/limits';
 
-const CryptoJS = require("crypto-js");
-const bip39 = require('bip39');
+import CryptoJS from 'crypto-js';
+import * as bip39 from 'bip39';
 
 const GCM_NONCE_BYTES = 12;
 

@@ -2,7 +2,11 @@
   "buildCommand": "npm run build",
   "devCommand": "npm start",
   "installCommand": "npm ci",
-  "framework": "create-react-app",
+  "outputDirectory": "build",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

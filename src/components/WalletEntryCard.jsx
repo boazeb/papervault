@@ -1,8 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Card, Form, InputGroup, Button, Badge, ListGroup, Collapse } from 'react-bootstrap';
 import { FaTrash, FaEye, FaEyeSlash as FaHide, FaCheck, FaExclamationTriangle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-
-const bip39 = require('bip39');
+import * as bip39 from 'bip39';
 
 
 function WalletEntryCard({ 
