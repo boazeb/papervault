@@ -6,6 +6,9 @@ COPY . .
 RUN npm run build
 
 FROM nginx:alpine
+# Patch base-image OS packages (e.g. c-ares, libexpat) so the weekly Trivy scan stays clean
+# even when the upstream nginx:alpine image lags behind Alpine's package fixes.
+RUN apk upgrade --no-cache
 ARG VERSION=""
 ARG REVISION=""
 ARG CREATED=""
