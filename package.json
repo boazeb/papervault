@@ -26,7 +26,7 @@
     "node": ">=24.x"
   },
   "dependencies": {
-    "@react-pdf/renderer": "^4.3.2",
+    "@react-pdf/renderer": "^4.6.0",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.2",
     "@yudiel/react-qr-scanner": "2.5.1",
