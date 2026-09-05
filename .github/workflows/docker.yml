@@ -275,7 +275,7 @@ jobs:
           echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
 
       - name: 🔐 Generate SBOM (SPDX)
-        uses: anchore/sbom-action@v0.24.0
+        uses: anchore/sbom-action@v0.24.2
         with:
           image: ${{ steps.manifest.outputs.primary_tag }}
           format: spdx-json
