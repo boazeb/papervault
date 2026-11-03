@@ -45,7 +45,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@papervault/cli": "file:../papervault-cli",
     "@papervault/core": "file:../papervault-core"
   }
